@@ -78,10 +78,16 @@ def _build_global_config_schema(defaults: dict[str, Any] | None = None) -> vol.S
     """Build the schema used by config and options flows."""
     values = GlobalConfig.from_mapping(defaults).as_dict()
     smart_mode_selector = selector.EntitySelector(
-        selector.EntitySelectorConfig(domain="binary_sensor", multiple=False)
+        selector.EntitySelectorConfig(
+            domain=["binary_sensor", "input_boolean"],
+            multiple=False,
+        )
     )
     night_mode_selector = selector.EntitySelector(
-        selector.EntitySelectorConfig(domain="binary_sensor", multiple=False)
+        selector.EntitySelectorConfig(
+            domain=["binary_sensor", "input_boolean"],
+            multiple=False,
+        )
     )
     alarm_selector = selector.EntitySelector(
         selector.EntitySelectorConfig(domain="alarm_control_panel", multiple=False)

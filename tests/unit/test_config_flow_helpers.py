@@ -82,6 +82,25 @@ def test_schema_builders_accept_expected_payloads() -> None:
     assert select_schema({"controller_id": "hallway"})["controller_id"] == "hallway"
 
 
+def test_global_schema_accepts_input_booleans_for_mode_helpers() -> None:
+    global_schema = _build_global_config_schema(
+        {
+            "smart_mode_entity": "input_boolean.smart_mode",
+            "night_mode_entity": "input_boolean.night_mode",
+        }
+    )
+
+    result = global_schema(
+        {
+            "smart_mode_entity": "input_boolean.smart_mode",
+            "night_mode_entity": "input_boolean.night_mode",
+        }
+    )
+
+    assert result["smart_mode_entity"] == "input_boolean.smart_mode"
+    assert result["night_mode_entity"] == "input_boolean.night_mode"
+
+
 @pytest.mark.asyncio
 async def test_user_flow_shows_form_without_input(hass) -> None:
     flow = SwitchManagerConfigFlow()

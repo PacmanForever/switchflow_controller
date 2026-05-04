@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1
+
+- Allowed `smart mode` and `night mode` global helpers to use either `binary_sensor` or `input_boolean` entities.
+- Refined controller and global settings UI wording and ordering.
+- Removed the unused controller `Area` field from the visible options flow.
+- Reorganized GitHub Actions into separate unit, component, daily compatibility, HACS validation, and HA validation workflows.
+- Raised automated test coverage to exceed the enforced `95%` minimum.
+
 ## 0.1.0
 
 - Added the initial Home Assistant custom integration scaffold for `switch_manager`.
