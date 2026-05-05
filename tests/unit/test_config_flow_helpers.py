@@ -77,7 +77,7 @@ def test_schema_builders_accept_expected_payloads() -> None:
             "main_entity": "light.hallway",
             "activate_on_detection": True,
             "turn_off_when_presence_clears": False,
-            "wait_time": 60,
+            "wait_time": {"minutes": 1},
             "notify_with_alarm": False,
         }
     )["main_entity"] == "light.hallway"
