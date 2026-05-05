@@ -140,6 +140,7 @@ class ControllerRuntime:
             await self._async_turn_off_configured_entities(
                 [self.controller.turn_off_entity_1, self.controller.turn_off_entity_2]
             )
+            await self._async_restart_timer()
             return
 
         if new_state.state == STATE_OFF:
@@ -368,6 +369,9 @@ class ControllerRuntime:
         """Wait for the controller timeout and then shut down controlled entities."""
         try:
             await asyncio.sleep(self.controller.wait_time)
+            if not await self._async_all_detectors_are_clear():
+                await self._async_restart_timer()
+                return
             await self._async_turn_off_controlled_entities()
         except asyncio.CancelledError:
             raise

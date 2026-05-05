@@ -7,6 +7,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.util import slugify
 
@@ -30,17 +31,12 @@ from .const import (
     CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
     CONF_WAIT_TIME,
     DOMAIN,
+    SUBENTRY_TYPE_CONTROLLER,
     TITLE,
 )
 from .models import ControllerConfig, GlobalConfig
-from .storage import SwitchManagerStorage
 
 STEP_GLOBAL_SETTINGS = "global_settings"
-STEP_ADD_CONTROLLER = "add_controller"
-STEP_SELECT_CONTROLLER = "select_controller"
-STEP_CONTROLLER_ACTIONS = "controller_actions"
-STEP_EDIT_CONTROLLER = "edit_controller"
-STEP_DELETE_CONTROLLER = "delete_controller"
 
 
 def _derive_controller_name(
@@ -253,6 +249,14 @@ class SwitchManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    @classmethod
+    @callback
+    def async_get_supported_subentry_types(
+        cls, config_entry: config_entries.ConfigEntry
+    ) -> dict[str, type[config_entries.ConfigSubentryFlow]]:
+        """Return subentries supported by this integration."""
+        return {SUBENTRY_TYPE_CONTROLLER: SwitchManagerControllerSubentryFlow}
+
     @staticmethod
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
@@ -283,20 +287,12 @@ class SwitchManagerOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize the options flow."""
         self._config_entry = config_entry
-        self._selected_controller_id: str | None = None
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
-        """Show the main options menu."""
-        storage = SwitchManagerStorage(self.hass)
-        controllers = await storage.async_load()
-
-        menu_options = [STEP_GLOBAL_SETTINGS, STEP_ADD_CONTROLLER]
-        if controllers:
-            menu_options.append(STEP_SELECT_CONTROLLER)
-
-        return self.async_show_menu(step_id="init", menu_options=menu_options)
+        """Open global settings directly from options."""
+        return await self.async_step_global_settings(user_input)
 
     async def async_step_global_settings(
         self, user_input: dict[str, Any] | None = None
@@ -313,120 +309,65 @@ class SwitchManagerOptionsFlow(config_entries.OptionsFlow):
             ),
         )
 
-    async def async_step_add_controller(
+
+class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
+    """Manage controller subentries shown on the integration page."""
+
+    async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.ConfigFlowResult:
-        """Create a new controller record."""
-        if user_input is not None:
-            storage = SwitchManagerStorage(self.hass)
-            controllers = await storage.async_load()
-            controller_name = _derive_controller_name(
-                self.hass, user_input[CONF_MAIN_ENTITY]
-            )
-            controller = ControllerConfig.from_mapping(
-                {
-                    **user_input,
-                    "name": controller_name,
-                    "id": _build_controller_id(
-                        controller_name,
-                        {existing.controller_id for existing in controllers},
-                    ),
-                }
-            )
-            await storage.async_upsert(controller)
-            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
-            return self.async_create_entry(title="", data=dict(self._config_entry.options))
-
-        return self.async_show_form(
-            step_id=STEP_ADD_CONTROLLER,
-            data_schema=_build_controller_schema(),
-        )
-
-    async def async_step_select_controller(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.ConfigFlowResult:
-        """Select a controller to edit or delete."""
-        storage = SwitchManagerStorage(self.hass)
-        controllers = await storage.async_load()
-
-        if not controllers:
-            return self.async_abort(reason="no_controllers")
-
-        if user_input is not None:
-            self._selected_controller_id = user_input["controller_id"]
-            return await self.async_step_controller_actions()
-
-        return self.async_show_form(
-            step_id=STEP_SELECT_CONTROLLER,
-            data_schema=_build_controller_select_schema(controllers),
-        )
-
-    async def async_step_controller_actions(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.ConfigFlowResult:
-        """Show the action menu for the selected controller."""
-        if self._selected_controller_id is None:
-            return await self.async_step_select_controller()
-
-        return self.async_show_menu(
-            step_id=STEP_CONTROLLER_ACTIONS,
-            menu_options=[STEP_EDIT_CONTROLLER, STEP_DELETE_CONTROLLER],
-        )
-
-    async def async_step_edit_controller(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.ConfigFlowResult:
-        """Edit an existing controller."""
-        storage = SwitchManagerStorage(self.hass)
-        controllers = await storage.async_load()
-        existing = next(
-            (
-                controller
-                for controller in controllers
-                if controller.controller_id == self._selected_controller_id
-            ),
-            None,
-        )
-
-        if existing is None:
-            return self.async_abort(reason="controller_not_found")
+    ) -> config_entries.SubentryFlowResult:
+        """Create a controller subentry."""
+        entry = self._get_entry()
 
         if user_input is not None:
             controller_name = _derive_controller_name(
                 self.hass,
                 user_input[CONF_MAIN_ENTITY],
-                fallback=existing.name,
             )
-            controller = ControllerConfig.from_mapping(
-                {
-                    **user_input,
-                    "name": controller_name,
-                    "id": existing.controller_id,
-                }
+            existing_ids = {
+                subentry.unique_id
+                for subentry in entry.subentries.values()
+                if subentry.subentry_type == SUBENTRY_TYPE_CONTROLLER
+                and subentry.unique_id is not None
+            }
+            return self.async_create_entry(
+                title=controller_name,
+                data=user_input,
+                unique_id=_build_controller_id(controller_name, existing_ids),
             )
-            await storage.async_upsert(controller)
-            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
-            return self.async_create_entry(title="", data=dict(self._config_entry.options))
 
         return self.async_show_form(
-            step_id=STEP_EDIT_CONTROLLER,
-            data_schema=_build_controller_schema(existing.as_dict()),
+            step_id="user",
+            data_schema=_build_controller_schema(),
         )
 
-    async def async_step_delete_controller(
+    async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.ConfigFlowResult:
-        """Delete an existing controller after confirmation."""
-        if self._selected_controller_id is None:
-            return await self.async_step_select_controller()
+    ) -> config_entries.SubentryFlowResult:
+        """Reconfigure an existing controller subentry."""
+        entry = self._get_entry()
+        subentry = self._get_reconfigure_subentry()
 
         if user_input is not None:
-            storage = SwitchManagerStorage(self.hass)
-            await storage.async_delete(self._selected_controller_id)
-            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
-            return self.async_create_entry(title="", data=dict(self._config_entry.options))
+            controller_name = _derive_controller_name(
+                self.hass,
+                user_input[CONF_MAIN_ENTITY],
+                fallback=subentry.title,
+            )
+            return self.async_update_and_abort(
+                entry,
+                subentry,
+                title=controller_name,
+                data=user_input,
+            )
 
         return self.async_show_form(
-            step_id=STEP_DELETE_CONTROLLER,
-            data_schema=vol.Schema({}),
+            step_id="reconfigure",
+            data_schema=_build_controller_schema(
+                {
+                    **dict(subentry.data),
+                    "id": subentry.unique_id,
+                    "name": subentry.title,
+                }
+            ),
         )

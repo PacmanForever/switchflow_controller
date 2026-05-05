@@ -6,12 +6,13 @@ from dataclasses import replace
 import logging
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigSubentry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from .controller import ControllerRuntime
+from .const import SUBENTRY_TYPE_CONTROLLER
 from .models import ControllerConfig, GlobalConfig
-from .storage import SwitchManagerStorage
 
 LOGGER = logging.getLogger(__name__)
 
@@ -23,16 +24,31 @@ class SwitchManagerRuntime:
         """Initialize the runtime manager."""
         self.hass = hass
         self.config_entry = config_entry
-        self.storage = SwitchManagerStorage(hass)
         self.global_config = GlobalConfig.from_mapping(
             config_entry.options or config_entry.data
         )
         self.controllers: dict[str, ControllerConfig] = {}
+        self._controller_subentries: dict[str, ConfigSubentry] = {}
         self._controller_runtimes: dict[str, ControllerRuntime] = {}
 
     async def async_setup(self) -> None:
         """Load controllers and start their runtimes."""
-        controller_configs = await self.storage.async_load()
+        self._controller_subentries = {
+            subentry.unique_id: subentry
+            for subentry in self.config_entry.subentries.values()
+            if subentry.subentry_type == SUBENTRY_TYPE_CONTROLLER
+            and subentry.unique_id is not None
+        }
+        controller_configs = [
+            ControllerConfig.from_mapping(
+                {
+                    **dict(subentry.data),
+                    "id": controller_id,
+                    "name": subentry.title,
+                }
+            )
+            for controller_id, subentry in self._controller_subentries.items()
+        ]
         self.controllers = {
             controller.controller_id: controller for controller in controller_configs
         }
@@ -84,8 +100,12 @@ class SwitchManagerRuntime:
     ) -> None:
         """Persist the enabled state of a controller and reload runtimes."""
         controller = self.get_controller(controller_id)
-        await self.storage.async_upsert(replace(controller, enabled=enabled))
-        await self.async_reload()
+        subentry = self._get_controller_subentry(controller_id)
+        self.hass.config_entries.async_update_subentry(
+            self.config_entry,
+            subentry,
+            data=_subentry_data_from_controller(replace(controller, enabled=enabled)),
+        )
 
     async def async_force_turn_on(self, controller_id: str) -> None:
         """Force a controller target on."""
@@ -121,3 +141,19 @@ class SwitchManagerRuntime:
                 f"Controller {controller_id} is disabled or not running"
             )
         await runtime.async_reset_timer()
+
+    def _get_controller_subentry(self, controller_id: str) -> ConfigSubentry:
+        """Return the subentry backing one controller or raise a clear error."""
+        subentry = self._controller_subentries.get(controller_id)
+        if subentry is None:
+            raise HomeAssistantError(f"Unknown controller id: {controller_id}")
+        return subentry
+
+
+def _subentry_data_from_controller(controller: ControllerConfig) -> dict[str, object]:
+    """Serialize only the fields stored inside controller subentries."""
+    return {
+        key: value
+        for key, value in controller.as_dict().items()
+        if key not in {"id", "name"}
+    }

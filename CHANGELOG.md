@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2
+
+- Migrated controllers from storage-backed records to Home Assistant config subentries so they appear directly under the integration page.
+- Added one-time migration from legacy controller storage into subentries during setup.
+- Simplified integration options to global settings only and moved controller add/edit flows into subentry creation and reconfiguration.
+- Made manual main-entity activation restart the shutdown timer and made timer expiry extend itself while a detector remains active.
+- Clarified the controller UI so detector-clear shutdown behavior is explicit relative to the configured delay.
+
 ## 0.1.1
 
 - Allowed `smart mode` and `night mode` global helpers to use either `binary_sensor` or `input_boolean` entities.

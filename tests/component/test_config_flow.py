@@ -2,19 +2,21 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from types import MappingProxyType
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import pytest
 
+from homeassistant.config_entries import ConfigSubentry
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.switch_manager.config_flow import (
     SwitchManagerConfigFlow,
-    SwitchManagerOptionsFlow,
+    SwitchManagerControllerSubentryFlow,
 )
-from custom_components.switch_manager.const import DOMAIN
-from custom_components.switch_manager.models import ControllerConfig
+from custom_components.switch_manager.const import DOMAIN, SUBENTRY_TYPE_CONTROLLER
 
 
 @pytest.mark.asyncio
@@ -38,24 +40,42 @@ async def test_user_flow_creates_single_instance_entry(hass) -> None:
 
 
 @pytest.mark.asyncio
-async def test_options_flow_adds_controller(hass) -> None:
-    """The options flow should persist a new controller."""
-    entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={})
-    flow = SwitchManagerOptionsFlow(entry)
+async def test_controller_subentry_flow_adds_controller(hass) -> None:
+    """The controller subentry flow should create a subentry result."""
+    flow = SwitchManagerControllerSubentryFlow()
     flow.hass = hass
+    flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
+    flow.context = {"source": "user"}
 
-    with (
-        patch(
-            "custom_components.switch_manager.config_flow.SwitchManagerStorage.async_load",
-            AsyncMock(return_value=[]),
-        ),
-        patch(
-            "custom_components.switch_manager.config_flow.SwitchManagerStorage.async_upsert",
-            AsyncMock(),
-        ) as upsert_mock,
-        patch.object(hass.config_entries, "async_reload", AsyncMock()),
-    ):
-        result = await flow.async_step_add_controller(
+    with patch.object(flow, "_get_entry", return_value=SimpleNamespace(subentries={})):
+        result = await flow.async_step_user(
+        {
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+            "enabled": True,
+            "activate_on_detection": True,
+            "turn_off_when_presence_clears": False,
+            "notify_with_alarm": False,
+        }
+        )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["unique_id"] == "hallway"
+    assert result["title"] == "Hallway"
+    assert result["data"]["main_entity"] == "light.hallway"
+
+
+@pytest.mark.asyncio
+async def test_controller_subentry_flow_reconfigures_existing_controller(hass) -> None:
+    """The controller subentry reconfigure flow should update title and data."""
+    flow = SwitchManagerControllerSubentryFlow()
+    flow.hass = hass
+    flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
+    flow.context = {"source": "reconfigure", "subentry_id": "sub-1"}
+    hass.config_entries.async_update_subentry = Mock(return_value=True)
+    entry = SimpleNamespace()
+    subentry = ConfigSubentry(
+        data=MappingProxyType(
             {
                 "main_entity": "light.hallway",
                 "wait_time": 120,
@@ -64,56 +84,28 @@ async def test_options_flow_adds_controller(hass) -> None:
                 "turn_off_when_presence_clears": False,
                 "notify_with_alarm": False,
             }
-        )
-
-    assert result["type"] is FlowResultType.CREATE_ENTRY
-    stored_controller = upsert_mock.await_args.args[0]
-    assert stored_controller.controller_id == "hallway"
-    assert stored_controller.name == "Hallway"
-    assert stored_controller.main_entity == "light.hallway"
-
-
-@pytest.mark.asyncio
-async def test_options_flow_edits_existing_controller(hass) -> None:
-    """The options flow should edit an existing controller record."""
-    entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={})
-    flow = SwitchManagerOptionsFlow(entry)
-    flow.hass = hass
-    flow._selected_controller_id = "hallway"
-    controller = ControllerConfig.from_mapping(
-        {
-            "id": "hallway",
-            "name": "Hallway",
-            "main_entity": "light.hallway",
-            "wait_time": 120,
-        }
+        ),
+        subentry_id="sub-1",
+        subentry_type=SUBENTRY_TYPE_CONTROLLER,
+        title="Hallway",
+        unique_id="hallway",
     )
 
-    with (
-        patch(
-            "custom_components.switch_manager.config_flow.SwitchManagerStorage.async_load",
-            AsyncMock(return_value=[controller]),
-        ),
-        patch(
-            "custom_components.switch_manager.config_flow.SwitchManagerStorage.async_upsert",
-            AsyncMock(),
-        ) as upsert_mock,
-        patch.object(hass.config_entries, "async_reload", AsyncMock()),
+    with patch.object(flow, "_get_entry", return_value=entry), patch.object(
+        flow, "_get_reconfigure_subentry", return_value=subentry
     ):
-        result = await flow.async_step_edit_controller(
-            {
-                "main_entity": "light.kitchen",
-                "wait_time": 180,
-                "enabled": True,
-                "activate_on_detection": True,
-                "turn_off_when_presence_clears": False,
-                "notify_with_alarm": False,
-            }
+        result = await flow.async_step_reconfigure(
+        {
+            "main_entity": "light.kitchen",
+            "wait_time": 180,
+            "enabled": True,
+            "activate_on_detection": True,
+            "turn_off_when_presence_clears": False,
+            "notify_with_alarm": False,
+        }
         )
 
-    assert result["type"] is FlowResultType.CREATE_ENTRY
-    stored_controller = upsert_mock.await_args.args[0]
-    assert stored_controller.controller_id == "hallway"
-    assert stored_controller.name == "Kitchen"
-    assert stored_controller.main_entity == "light.kitchen"
-    assert stored_controller.wait_time == 180
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    hass.config_entries.async_update_subentry.assert_called_once()
+    assert hass.config_entries.async_update_subentry.call_args.kwargs["title"] == "Kitchen"

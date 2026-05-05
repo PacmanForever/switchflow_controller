@@ -85,3 +85,33 @@ async def test_manual_night_on_restarts_timer_and_turns_off_secondaries(hass) ->
 
     runtime._async_turn_off_configured_entities.assert_awaited_once()
     runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_manual_main_on_restarts_timer_and_turns_off_secondaries(hass) -> None:
+    """Manual main-entity activation should still participate in controller timing."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "turn_off_entity_1": "light.other",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_turn_off_configured_entities = AsyncMock()
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime._async_handle_main_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway",
+                "new_state": State("light.hallway", "on"),
+            },
+        )
+    )
+
+    runtime._async_turn_off_configured_entities.assert_awaited_once_with(["light.other", None])
+    runtime._async_restart_timer.assert_awaited_once()

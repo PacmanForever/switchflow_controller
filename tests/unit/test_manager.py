@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from types import MappingProxyType, SimpleNamespace
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
+from homeassistant.config_entries import ConfigSubentry
 from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.switch_manager.manager import SwitchManagerRuntime
+from custom_components.switch_manager.const import SUBENTRY_TYPE_CONTROLLER
 from custom_components.switch_manager.models import ControllerConfig
 
 
@@ -63,16 +65,33 @@ class FakeRuntime:
         self.timer_reset = True
 
 
+def _config_entry(*controllers: ControllerConfig, options: dict | None = None):
+    subentries = {
+        controller.controller_id: ConfigSubentry(
+            data=MappingProxyType(
+                {
+                    key: value
+                    for key, value in controller.as_dict().items()
+                    if key not in {"id", "name"}
+                }
+            ),
+            subentry_id=f"subentry-{controller.controller_id}",
+            subentry_type=SUBENTRY_TYPE_CONTROLLER,
+            title=controller.name,
+            unique_id=controller.controller_id,
+        )
+        for controller in controllers
+    }
+    return SimpleNamespace(entry_id="entry-1", data={}, options=options or {}, subentries=subentries)
+
+
 @pytest.mark.asyncio
 async def test_async_setup_starts_only_enabled_controllers(hass, monkeypatch) -> None:
     """Setup should start runtimes only for enabled controllers."""
 
     FakeRuntime.created = []
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry(_controller("hallway"), _controller("kitchen", enabled=False))
     runtime = SwitchManagerRuntime(hass, config_entry)
-    runtime.storage.async_load = AsyncMock(
-        return_value=[_controller("hallway"), _controller("kitchen", enabled=False)]
-    )
     monkeypatch.setattr("custom_components.switch_manager.manager.ControllerRuntime", FakeRuntime)
 
     await runtime.async_setup()
@@ -87,7 +106,7 @@ async def test_async_setup_starts_only_enabled_controllers(hass, monkeypatch) ->
 async def test_async_unload_stops_all_active_runtimes(hass) -> None:
     """Unload should stop and clear all active runtimes."""
 
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry()
     runtime = SwitchManagerRuntime(hass, config_entry)
     first = SimpleNamespace(async_stop=AsyncMock())
     second = SimpleNamespace(async_stop=AsyncMock())
@@ -104,11 +123,7 @@ async def test_async_unload_stops_all_active_runtimes(hass) -> None:
 async def test_async_reload_refreshes_global_config_and_reuses_setup(hass) -> None:
     """Reload should unload first, rebuild global config, and setup again."""
 
-    config_entry = SimpleNamespace(
-        entry_id="entry-1",
-        data={},
-        options={"smart_mode_entity": "binary_sensor.smart"},
-    )
+    config_entry = _config_entry(options={"smart_mode_entity": "binary_sensor.smart"})
     runtime = SwitchManagerRuntime(hass, config_entry)
     runtime.async_unload = AsyncMock()
     runtime.async_setup = AsyncMock()
@@ -123,7 +138,7 @@ async def test_async_reload_refreshes_global_config_and_reuses_setup(hass) -> No
 def test_get_controller_returns_known_controller_and_raises_for_unknown(hass) -> None:
     """Controller lookups should be explicit and fail clearly."""
 
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry()
     runtime = SwitchManagerRuntime(hass, config_entry)
     controller = _controller("hallway")
     runtime.controllers = {"hallway": controller}
@@ -135,21 +150,22 @@ def test_get_controller_returns_known_controller_and_raises_for_unknown(hass) ->
 
 @pytest.mark.asyncio
 async def test_async_set_controller_enabled_persists_and_reloads(hass) -> None:
-    """Enabling or disabling should persist through storage and reload runtimes."""
+    """Enabling or disabling should update the backing controller subentry."""
 
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry(_controller("hallway", enabled=True))
     runtime = SwitchManagerRuntime(hass, config_entry)
     controller = _controller("hallway", enabled=True)
     runtime.controllers = {"hallway": controller}
-    runtime.storage.async_upsert = AsyncMock()
-    runtime.async_reload = AsyncMock()
+    runtime._controller_subentries = {"hallway": config_entry.subentries["hallway"]}
+    hass.config_entries.async_update_subentry = Mock(return_value=True)
 
     await runtime.async_set_controller_enabled("hallway", False)
 
-    stored_controller = runtime.storage.async_upsert.await_args.args[0]
-    assert stored_controller.controller_id == "hallway"
-    assert stored_controller.enabled is False
-    runtime.async_reload.assert_awaited_once()
+    hass.config_entries.async_update_subentry.assert_called_once()
+    updated_data = hass.config_entries.async_update_subentry.call_args.kwargs["data"]
+    assert updated_data["enabled"] is False
+    assert "id" not in updated_data
+    assert "name" not in updated_data
 
 
 @pytest.mark.asyncio
@@ -159,7 +175,7 @@ async def test_force_turn_on_and_off_build_ephemeral_runtime_when_missing(
     """Force operations should create a temporary runtime when none is active."""
 
     FakeRuntime.created = []
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry()
     runtime = SwitchManagerRuntime(hass, config_entry)
     runtime.controllers = {"hallway": _controller("hallway")}
     monkeypatch.setattr("custom_components.switch_manager.manager.ControllerRuntime", FakeRuntime)
@@ -176,7 +192,7 @@ async def test_force_turn_on_and_off_build_ephemeral_runtime_when_missing(
 async def test_force_turn_on_and_reset_use_existing_runtime(hass) -> None:
     """Active runtimes should be reused for imperative operations."""
 
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry()
     runtime = SwitchManagerRuntime(hass, config_entry)
     runtime.controllers = {"hallway": _controller("hallway")}
     active_runtime = SimpleNamespace(
@@ -199,7 +215,7 @@ async def test_force_turn_on_and_reset_use_existing_runtime(hass) -> None:
 async def test_reset_timer_requires_running_runtime(hass) -> None:
     """Resetting a timer should fail for a controller without active runtime."""
 
-    config_entry = SimpleNamespace(entry_id="entry-1", data={}, options={})
+    config_entry = _config_entry()
     runtime = SwitchManagerRuntime(hass, config_entry)
     runtime.controllers = {"hallway": _controller("hallway")}
 

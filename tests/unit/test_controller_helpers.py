@@ -95,6 +95,7 @@ async def test_handle_main_entity_event_covers_on_off_and_missing_state(hass) ->
     hass.states.async_set("light.night", "on")
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     runtime._async_turn_off_configured_entities = AsyncMock()
+    runtime._async_restart_timer = AsyncMock()
     runtime._async_cancel_timer = AsyncMock()
     runtime._async_turn_off_entity = AsyncMock()
 
@@ -107,6 +108,7 @@ async def test_handle_main_entity_event_covers_on_off_and_missing_state(hass) ->
     )
 
     runtime._async_turn_off_configured_entities.assert_awaited_once_with(["switch.a", "light.b"])
+    runtime._async_restart_timer.assert_awaited_once()
     runtime._async_cancel_timer.assert_awaited_once()
     runtime._async_turn_off_entity.assert_awaited_once_with("light.night")
 
@@ -154,6 +156,26 @@ async def test_detector_on_branch_respects_smart_mode_and_restart_logic(hass) ->
     runtime._async_run_alarm_notification_path.assert_awaited_once()
     runtime._async_run_detection_activation_path.assert_awaited_once()
     runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_detector_clear_turns_off_even_without_running_timer(hass) -> None:
+    """Detector-clear shutdown should not depend on an active timer task."""
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig(),
+        _controller(turn_off_when_presence_clears=True, detector_sensor_1="binary_sensor.motion1"),
+        "entry-1",
+    )
+    runtime._async_all_detectors_are_clear = AsyncMock(return_value=True)
+    runtime._async_turn_off_controlled_entities = AsyncMock()
+    runtime._async_cancel_timer = AsyncMock()
+
+    await runtime._async_handle_detector_state_change(State("binary_sensor.motion1", "off"))
+
+    runtime._async_turn_off_controlled_entities.assert_awaited_once()
+    runtime._async_cancel_timer.assert_awaited_once()
 
 
 def test_is_smart_mode_enabled_reads_global_entity(hass) -> None:
@@ -285,6 +307,7 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
 
     monkeypatch.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
     runtime._timer_task = object()
+    runtime._async_all_detectors_are_clear = AsyncMock(return_value=True)
     await runtime._async_timer_worker()
     assert runtime._timer_task is None
     runtime._async_turn_off_controlled_entities.assert_awaited_once()
@@ -299,6 +322,33 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
     await runtime._async_turn_off_controlled_entities()
     assert runtime._async_turn_off_entity.await_args_list[-2].args[0] == "light.hallway"
     assert runtime._async_turn_off_entity.await_args_list[-1].args[0] == "light.night"
+
+
+@pytest.mark.asyncio
+async def test_timer_worker_restarts_when_detector_still_active(hass, monkeypatch) -> None:
+    """Timer expiry should restart instead of turning off while detection remains active."""
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig(),
+        _controller(detector_sensor_1="binary_sensor.motion1"),
+        "entry-1",
+    )
+    runtime._async_turn_off_controlled_entities = AsyncMock()
+    runtime._async_restart_timer = AsyncMock()
+    runtime._async_all_detectors_are_clear = AsyncMock(return_value=False)
+
+    async def immediate_sleep(_seconds: int) -> None:
+        return None
+
+    monkeypatch.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
+    runtime._timer_task = object()
+
+    await runtime._async_timer_worker()
+
+    runtime._async_restart_timer.assert_awaited_once()
+    runtime._async_turn_off_controlled_entities.assert_not_awaited()
+    assert runtime._timer_task is None
 
 
 @pytest.mark.asyncio

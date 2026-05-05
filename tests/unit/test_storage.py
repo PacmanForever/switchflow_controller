@@ -142,6 +142,18 @@ async def test_async_delete_removes_matching_controller(hass) -> None:
     storage.async_save.assert_awaited_once_with(updated)
 
 
+@pytest.mark.asyncio
+async def test_async_clear_persists_empty_controller_list(hass) -> None:
+    """Clearing storage should persist an empty controller payload."""
+
+    storage = SwitchManagerStorage(hass)
+    storage.async_save = AsyncMock()
+
+    await storage.async_clear()
+
+    storage.async_save.assert_awaited_once_with([])
+
+
 def test_normalize_payload_replaces_invalid_controller_container() -> None:
     """Invalid controller containers should normalize to an empty list."""
 

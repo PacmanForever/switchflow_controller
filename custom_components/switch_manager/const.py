@@ -33,6 +33,7 @@ DEFAULT_WAIT_TIME_SECONDS: Final = 120
 
 STORAGE_KEY: Final = f"{DOMAIN}.controllers"
 STORAGE_VERSION: Final = 1
+SUBENTRY_TYPE_CONTROLLER: Final = "controller"
 
 DATA_MANAGER: Final = "manager"
 ISSUE_ID_PREFIX: Final = "configured_entity_unavailable"

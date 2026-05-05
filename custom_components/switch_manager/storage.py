@@ -71,6 +71,10 @@ class SwitchManagerStorage:
         await self.async_save(updated)
         return updated
 
+    async def async_clear(self) -> None:
+        """Remove all stored controllers after migration."""
+        await self.async_save([])
+
     @staticmethod
     def _normalize_payload(payload: Any) -> tuple[dict[str, Any], bool]:
         """Normalize legacy payload shapes into the current schema."""
