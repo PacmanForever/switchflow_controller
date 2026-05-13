@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Rebranded the integration to `SwitchFlow Controller` to avoid Home Assistant and HACS branding collisions with another `Switch Manager` integration.
+- Marked the integration as a single config entry so Home Assistant no longer offers duplicate main-entry creation while controller subentries remain available.
+- Added Catalan translations for the config flow and controller subentry flow so Home Assistant no longer shows raw translation keys in Catalan UI sessions.
+- Updated repository metadata and documentation for the renamed `PacmanForever/switchflow_controller` repository.
+
 ## 0.1.9
 
 - Serialized each controller timer lifecycle so concurrent restart/cancel paths cannot leave orphaned timer tasks behind.
