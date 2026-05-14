@@ -9,8 +9,4 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
-/.ha_dev/*
-!/.ha_dev/configuration.yaml
-!/.ha_dev/automations.yaml
-!/.ha_dev/scripts.yaml
-!/.ha_dev/scenes.yaml
+/.ha_dev/
