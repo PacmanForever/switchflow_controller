@@ -146,6 +146,25 @@ The notification action must be configured as a `script` entity, not as a free-f
 
 If no notification script is configured, the controller skips notification safely.
 
+The script is called through the `script` domain and receives at least these fields:
+
+- `message`
+- `controller_name`
+- `trigger_entity_id`
+
+Example script:
+
+```yaml
+alias: Send Alarm Message
+sequence:
+  - data:
+      topic: alarm
+      payload: "{{ message }}"
+    action: mqtt.publish
+mode: single
+max_exceeded: silent
+```
+
 ## Example Use Cases
 
 ### Bathroom Controller

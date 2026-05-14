@@ -6,8 +6,8 @@
         "title": "Configura SwitchFlow Controller",
         "description": "Configura les referències globals compartides que fan servir els controllers.",
         "data": {
-          "smart_mode_entity": "Mode intel·ligent actiu",
-          "night_mode_entity": "Mode nit actiu",
+          "smart_mode_entity": "Sensor binari/booleà de mode intel·ligent actiu",
+          "night_mode_entity": "Sensor binari/booleà de mode nit actiu",
           "alarm_entity": "Alarma",
           "alarm_timer_entity": "Retard de l'alarma",
           "alarm_notification_script_entity": "Script de notificació de l'alarma"
@@ -38,8 +38,8 @@
         "title": "Edita la configuració global",
         "description": "Actualitza les referències globals compartides que fan servir tots els controllers.",
         "data": {
-          "smart_mode_entity": "Mode intel·ligent actiu",
-          "night_mode_entity": "Mode nit actiu",
+          "smart_mode_entity": "Sensor binari/booleà de mode intel·ligent actiu",
+          "night_mode_entity": "Sensor binari/booleà de mode nit actiu",
           "alarm_entity": "Alarma",
           "alarm_timer_entity": "Retard de l'alarma",
           "alarm_notification_script_entity": "Script de notificació de l'alarma"
