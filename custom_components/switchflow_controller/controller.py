@@ -13,7 +13,7 @@ from homeassistant.const import (
     STATE_UNAVAILABLE,
     STATE_UNKNOWN,
 )
-from homeassistant.core import Event, HomeAssistant, State, callback
+from homeassistant.core import CoreState, Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import EventStateChangedData, async_track_state_change_event
 
 from .const import (
@@ -479,6 +479,8 @@ class ControllerRuntime:
         state = self.hass.states.get(entity_id)
         issue_key = (field_name, entity_id)
         if state is None or state.state in {STATE_UNAVAILABLE, STATE_UNKNOWN}:
+            if self.hass.state is not CoreState.running:
+                return None
             if field_name in UNAVAILABLE_ISSUE_SUPPRESSED_FIELDS:
                 return None
             if issue_key not in self._unavailable_entities:

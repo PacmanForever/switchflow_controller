@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
+from homeassistant.core import CoreState
 from homeassistant.const import STATE_IDLE
 from homeassistant.core import Event, State
 
@@ -106,6 +107,50 @@ async def test_async_start_does_not_report_unavailable_for_startup_timer_probe(h
 
     runtime._async_restart_timer.assert_not_awaited()
     report_issue.assert_not_called()
+
+
+def test_get_state_suppresses_unavailable_warnings_while_hass_is_starting(
+    hass, monkeypatch
+) -> None:
+    """Unavailable entities should not warn before Home Assistant is fully running."""
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        _controller(),
+        "entry-1",
+    )
+    report_issue = Mock()
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.report_configured_entity_unavailable",
+        report_issue,
+    )
+
+    hass.set_state(CoreState.starting)
+
+    assert runtime._get_state("binary_sensor.smart", "smart_mode_entity") is None
+    report_issue.assert_not_called()
+
+
+def test_get_state_reports_unavailable_once_hass_is_running(hass, monkeypatch) -> None:
+    """Unavailable entities should warn after Home Assistant startup completes."""
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        _controller(),
+        "entry-1",
+    )
+    report_issue = Mock()
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.report_configured_entity_unavailable",
+        report_issue,
+    )
+
+    hass.set_state(CoreState.running)
+
+    assert runtime._get_state("binary_sensor.smart", "smart_mode_entity") is None
+    report_issue.assert_called_once()
 
 
 @pytest.mark.asyncio
