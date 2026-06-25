@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4
+
+- Added a short startup grace window before reporting configured entities as unavailable, reducing false warnings for detectors that restore a few seconds after Home Assistant reaches `running`.
+- Added regression coverage for the post-startup unavailable-warning grace path.
+
 ## 0.3.3
 
 - Added a full Spanish translation for the integration UI.

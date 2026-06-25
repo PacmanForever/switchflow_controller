@@ -154,6 +154,47 @@ def test_get_state_reports_unavailable_once_hass_is_running(hass, monkeypatch) -
 
 
 @pytest.mark.asyncio
+async def test_get_state_suppresses_unavailable_warnings_during_startup_grace_period(
+    hass, monkeypatch
+) -> None:
+    """Entities missing just after startup should not warn until the grace period expires."""
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        _controller(),
+        "entry-1",
+    )
+    report_issue = Mock()
+    monotonic_value = 100.0
+
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.report_configured_entity_unavailable",
+        report_issue,
+    )
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.async_track_state_change_event",
+        lambda hass, entity_ids, callback: Mock(),
+    )
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.time.monotonic",
+        lambda: monotonic_value,
+    )
+
+    hass.set_state(CoreState.starting)
+    await runtime.async_start()
+    hass.set_state(CoreState.running)
+
+    assert runtime._get_state("binary_sensor.smart", "smart_mode_entity") is None
+    report_issue.assert_not_called()
+
+    monotonic_value += 31.0
+
+    assert runtime._get_state("binary_sensor.smart", "smart_mode_entity") is None
+    report_issue.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_force_operations_delegate_to_helper_paths(hass) -> None:
     """Force helpers should use the underlying controller methods."""
 

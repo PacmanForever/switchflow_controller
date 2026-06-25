@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import logging
+import time
 
 from homeassistant.const import (
     STATE_IDLE,
@@ -46,6 +47,7 @@ ARMED_ALARM_STATES = {
 UNAVAILABLE_ISSUE_SUPPRESSED_FIELDS = {
     CONF_NIGHT_ENTITY,
 }
+STARTUP_UNAVAILABLE_WARNING_GRACE_PERIOD = 30.0
 
 
 class ControllerRuntime:
@@ -67,11 +69,16 @@ class ControllerRuntime:
         self._timer_task: asyncio.Task[None] | None = None
         self._unsubscribers: list[Callable[[], None]] = []
         self._unavailable_entities: set[tuple[str, str]] = set()
+        self._startup_warning_grace_deadline: float | None = None
 
     async def async_start(self) -> None:
         """Start runtime handling for this controller."""
         LOGGER.debug("Starting controller runtime for %s", self.controller.controller_id)
         self._clear_known_configured_entity_issues()
+        if self.hass.state is not CoreState.running:
+            self._startup_warning_grace_deadline = (
+                time.monotonic() + STARTUP_UNAVAILABLE_WARNING_GRACE_PERIOD
+            )
 
         self.add_unsubscriber(
             async_track_state_change_event(
@@ -480,6 +487,11 @@ class ControllerRuntime:
         issue_key = (field_name, entity_id)
         if state is None or state.state in {STATE_UNAVAILABLE, STATE_UNKNOWN}:
             if self.hass.state is not CoreState.running:
+                return None
+            if (
+                self._startup_warning_grace_deadline is not None
+                and time.monotonic() < self._startup_warning_grace_deadline
+            ):
                 return None
             if field_name in UNAVAILABLE_ISSUE_SUPPRESSED_FIELDS:
                 return None
