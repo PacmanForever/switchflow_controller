@@ -1,0 +1,115 @@
+{
+  "title": "SwitchFlow Controller",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurar SwitchFlow Controller",
+        "description": "Configura las referencias globales compartidas que usan los controladores.",
+        "data": {
+          "smart_mode_entity": "Sensor binario/booleano de modo inteligente activo",
+          "night_mode_entity": "Sensor binario/booleano de modo noche activo",
+          "alarm_entity": "Alarma",
+          "alarm_timer_entity": "Temporizador de la alarma",
+          "alarm_notification_script_entity": "Script de notificación de la alarma"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "SwitchFlow Controller solo admite una entrada de configuración principal."
+    }
+  },
+  "issues": {
+    "configured_entity_unavailable": {
+      "title": "La entidad configurada no está disponible",
+      "description": "La entidad configurada `{entity_id}` del controlador `{controller_name}` en el campo `{field_name}` no está disponible. SwitchFlow Controller usará el comportamiento alternativo cuando sea posible hasta que la entidad vuelva a estar disponible."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SwitchFlow Controller",
+        "description": "Revisa los controladores existentes o elige qué quieres hacer a continuación.",
+        "data": {
+          "init_action": "Acción",
+          "controller_id": "Controladores"
+        }
+      },
+      "global_settings": {
+        "title": "Editar la configuración global",
+        "description": "Actualiza las referencias globales compartidas que usan todos los controladores.",
+        "data": {
+          "smart_mode_entity": "Sensor binario/booleano de modo inteligente activo",
+          "night_mode_entity": "Sensor binario/booleano de modo noche activo",
+          "alarm_entity": "Alarma",
+          "alarm_timer_entity": "Temporizador de la alarma",
+          "alarm_notification_script_entity": "Script de notificación de la alarma"
+        }
+      }
+    },
+    "abort": {
+      "no_controllers": "No hay ningún controlador para gestionar.",
+      "controller_not_found": "No se ha encontrado el controlador seleccionado."
+    },
+    "error": {
+      "no_controllers": "Primero debes seleccionar un controlador para esta acción."
+    },
+    "flow_title": "SwitchFlow Controller"
+  },
+  "config_subentries": {
+    "controller": {
+      "abort": {
+        "reconfigure_successful": "Controlador actualizado"
+      },
+      "error": {
+        "controlled_entity_already_configured": "La luz o interruptor principal o nocturno de este controlador ya se está usando en otro controlador.",
+        "main_and_night_entity_must_differ": "La luz o interruptor principal y el nocturno deben ser entidades diferentes.",
+        "main_entity_already_configured": "Ya existe un controlador con esta luz o interruptor principal."
+      },
+      "entry_type": "Controlador",
+      "initiate_flow": {
+        "reconfigure": "Reconfigurar controlador",
+        "user": "Añadir controlador"
+      },
+      "step": {
+        "user": {
+          "title": "Añadir controlador",
+          "description": "Crea un controlador con los campos obligatorios y opcionales de ejecución.",
+          "data": {
+            "enabled": "Activado",
+            "main_entity": "Luz o interruptor principal",
+            "night_entity": "Luz o interruptor nocturno",
+            "activate_on_detection": "Encender cuando se detecte movimiento o presencia",
+            "detector_sensor_1": "Detector de movimiento o presencia 1",
+            "detector_sensor_2": "Detector de movimiento o presencia 2",
+            "illuminance_threshold_entity": "Encender si la iluminancia es inferior a",
+            "illuminance_sensor": "Sensor de iluminancia",
+            "turn_off_when_presence_clears": "Apagar cuando el detector se desactive (puede apagarse antes del retardo)",
+            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)",
+            "notify_with_alarm": "Notificar al encenderse cuando la alarma esté activada",
+            "turn_off_entity_1": "Al encender, apagar la luz o interruptor 1",
+            "turn_off_entity_2": "Al encender, apagar la luz o interruptor 2"
+          }
+        },
+        "reconfigure": {
+          "title": "Editar controlador",
+          "description": "Actualiza el controlador seleccionado.",
+          "data": {
+            "enabled": "Activado",
+            "main_entity": "Luz o interruptor principal",
+            "night_entity": "Luz o interruptor nocturno",
+            "activate_on_detection": "Encender cuando se detecte movimiento o presencia",
+            "detector_sensor_1": "Detector de movimiento o presencia 1",
+            "detector_sensor_2": "Detector de movimiento o presencia 2",
+            "illuminance_threshold_entity": "Encender si la iluminancia es inferior a",
+            "illuminance_sensor": "Sensor de iluminancia",
+            "turn_off_when_presence_clears": "Apagar cuando el detector se desactive (puede apagarse antes del retardo)",
+            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)",
+            "notify_with_alarm": "Notificar al encenderse cuando la alarma esté activada",
+            "turn_off_entity_1": "Al encender, apagar la luz o interruptor 1",
+            "turn_off_entity_2": "Al encender, apagar la luz o interruptor 2"
+          }
+        }
+      }
+    }
+  }
+}

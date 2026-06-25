@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3
+
+- Added a full Spanish translation for the integration UI.
+- Refined Catalan controller wording to use `controlador/controladors` consistently in the visible UI.
+
 ## 0.3.2
 
 - Fixed detector-driven delayed shutoff so active presence or motion while a controlled entity is already on refreshes the timer instead of allowing an unexpected turn-off when `turn_off_when_presence_clears` is disabled.

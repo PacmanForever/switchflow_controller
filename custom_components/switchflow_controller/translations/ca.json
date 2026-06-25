@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Configura SwitchFlow Controller",
-        "description": "Configura les referències globals compartides que fan servir els controllers.",
+        "description": "Configura les referències globals compartides que fan servir els controladors.",
         "data": {
           "smart_mode_entity": "Sensor binari/booleà de mode intel·ligent actiu",
           "night_mode_entity": "Sensor binari/booleà de mode nit actiu",
@@ -21,22 +21,22 @@
   "issues": {
     "configured_entity_unavailable": {
       "title": "L'entitat configurada no està disponible",
-      "description": "L'entitat configurada `{entity_id}` del controller `{controller_name}` al camp `{field_name}` no està disponible. SwitchFlow Controller farà servir el comportament alternatiu quan sigui possible fins que l'entitat torni a estar disponible."
+      "description": "L'entitat configurada `{entity_id}` del controlador `{controller_name}` al camp `{field_name}` no està disponible. SwitchFlow Controller farà servir el comportament alternatiu quan sigui possible fins que l'entitat torni a estar disponible."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "SwitchFlow Controller",
-        "description": "Revisa els controllers existents o tria què vols fer a continuació.",
+        "description": "Revisa els controladors existents o tria què vols fer a continuació.",
         "data": {
           "init_action": "Acció",
-          "controller_id": "Controllers"
+          "controller_id": "Controladors"
         }
       },
       "global_settings": {
         "title": "Edita la configuració global",
-        "description": "Actualitza les referències globals compartides que fan servir tots els controllers.",
+        "description": "Actualitza les referències globals compartides que fan servir tots els controladors.",
         "data": {
           "smart_mode_entity": "Sensor binari/booleà de mode intel·ligent actiu",
           "night_mode_entity": "Sensor binari/booleà de mode nit actiu",
@@ -47,33 +47,33 @@
       }
     },
     "abort": {
-      "no_controllers": "No hi ha cap controller per gestionar.",
-      "controller_not_found": "No s'ha trobat el controller seleccionat."
+      "no_controllers": "No hi ha cap controlador per gestionar.",
+      "controller_not_found": "No s'ha trobat el controlador seleccionat."
     },
     "error": {
-      "no_controllers": "Primer has de seleccionar un controller per a aquesta acció."
+      "no_controllers": "Primer has de seleccionar un controlador per a aquesta acció."
     },
     "flow_title": "SwitchFlow Controller"
   },
   "config_subentries": {
     "controller": {
       "abort": {
-        "reconfigure_successful": "Controller actualitzat"
+        "reconfigure_successful": "Controlador actualitzat"
       },
       "error": {
-        "controlled_entity_already_configured": "La llum o interruptor principal o nocturn d'aquest controller ja s'està fent servir en un altre controller.",
+        "controlled_entity_already_configured": "La llum o interruptor principal o nocturn d'aquest controlador ja s'està fent servir en un altre controlador.",
         "main_and_night_entity_must_differ": "La llum o interruptor principal i el nocturn han de ser entitats diferents.",
-        "main_entity_already_configured": "Ja existeix un controller amb aquesta llum o interruptor principal."
+        "main_entity_already_configured": "Ja existeix un controlador amb aquesta llum o interruptor principal."
       },
-      "entry_type": "Controller",
+      "entry_type": "Controlador",
       "initiate_flow": {
-        "reconfigure": "Reconfigura controller",
-        "user": "Afegeix controller"
+        "reconfigure": "Reconfigura controlador",
+        "user": "Afegeix controlador"
       },
       "step": {
         "user": {
-          "title": "Afegeix controller",
-          "description": "Crea un controller amb els camps obligatoris i opcionals d'execució.",
+          "title": "Afegeix controlador",
+          "description": "Crea un controlador amb els camps obligatoris i opcionals d'execució.",
           "data": {
             "enabled": "Activat",
             "main_entity": "Llum o interruptor principal",
@@ -91,8 +91,8 @@
           }
         },
         "reconfigure": {
-          "title": "Edita controller",
-          "description": "Actualitza el controller seleccionat.",
+          "title": "Edita controlador",
+          "description": "Actualitza el controlador seleccionat.",
           "data": {
             "enabled": "Activat",
             "main_entity": "Llum o interruptor principal",
