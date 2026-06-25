@@ -28,6 +28,14 @@ A community Home Assistant custom integration for managing reusable motion-drive
 - Global script-based alarm notification action
 - Conservative Home Assistant integration design focused on long-term maintainability
 
+## Languages
+
+The integration UI is currently available in:
+
+- English
+- Catalan
+- Spanish
+
 ## Installation
 
 ### Via HACS
