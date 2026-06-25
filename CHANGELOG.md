@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2
+
+- Fixed detector-driven delayed shutoff so active presence or motion while a controlled entity is already on refreshes the timer instead of allowing an unexpected turn-off when `turn_off_when_presence_clears` is disabled.
+- Added regression coverage for the detector timer refresh path and the `timedelta` wait-time normalizer branch.
+
 ## 0.3.1
 
 - Stopped controller automation completely while `smart_mode_entity` is off, so manual light changes no longer restart timers or cause automatic shutoff until smart mode is enabled again.

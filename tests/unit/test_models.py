@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 import pytest
 
 from custom_components.switchflow_controller.const import CONF_MAIN_ENTITY, CONF_WAIT_TIME
@@ -63,6 +65,7 @@ def test_normalizers_cover_invalid_and_empty_values() -> None:
     with pytest.raises(ValueError, match="Expected boolean value"):
         _normalize_bool("yes", default=False)
 
+    assert _normalize_wait_time(timedelta(seconds=5)) == 5
     assert _normalize_wait_time("12") == 12
     assert _normalize_wait_time({"hours": 1, "minutes": 2, "seconds": 3}) == 3723
     with pytest.raises(ValueError, match="positive integer"):

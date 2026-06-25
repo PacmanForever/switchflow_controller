@@ -156,6 +156,36 @@ async def test_manual_main_on_restarts_timer_and_turns_off_secondaries(hass) -> 
 
 
 @pytest.mark.asyncio
+async def test_detector_activity_restarts_timer_when_controlled_entity_is_already_on(hass) -> None:
+    """Detector activity should extend an active controller even without reactivation."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "detector_sensor_1": "binary_sensor.hallway_presence",
+            "activate_on_detection": False,
+            "wait_time": 120,
+        }
+    )
+    hass.states.async_set("light.hallway", "on")
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_run_alarm_notification_path = AsyncMock(return_value=False)
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime._async_handle_detector_state_change(
+        State(
+            "binary_sensor.hallway_presence",
+            "on",
+            {"device_class": "presence"},
+        )
+    )
+
+    runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_manual_main_on_does_nothing_when_smart_mode_is_disabled(hass) -> None:
     """Manual main-entity activation should be ignored when smart mode is off."""
     controller = ControllerConfig.from_mapping(

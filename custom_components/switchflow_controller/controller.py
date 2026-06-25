@@ -219,7 +219,7 @@ class ControllerRuntime:
             if self.controller.activate_on_detection:
                 activated = await self._async_run_detection_activation_path() or activated
 
-            if activated:
+            if activated or await self._async_any_controlled_entity_on():
                 await self._async_restart_timer()
             return
 
