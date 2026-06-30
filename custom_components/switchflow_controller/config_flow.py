@@ -244,6 +244,10 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
                 CONF_ACTIVATE_ON_DETECTION,
                 default=values.activate_on_detection if values else True,
             ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
+                default=values.turn_off_when_presence_clears if values else False,
+            ): selector.BooleanSelector(),
             _optional_selector_field(
                 CONF_DETECTOR_SENSOR_1,
                 detector_selector,
@@ -264,10 +268,6 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
                 sensor_selector,
                 values.illuminance_sensor if values else None,
             ): sensor_selector,
-            vol.Required(
-                CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
-                default=values.turn_off_when_presence_clears if values else False,
-            ): selector.BooleanSelector(),
             vol.Required(
                 CONF_WAIT_TIME,
                 default=_wait_time_selector_default(

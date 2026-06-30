@@ -6,10 +6,10 @@
         "title": "Set up SwitchFlow Controller",
         "description": "Configure the shared global references used by controllers.",
         "data": {
-          "smart_mode_entity": "Smart mode active",
-          "night_mode_entity": "Night mode active",
-          "alarm_entity": "Alarm",
-          "alarm_timer_entity": "Alarm retardation",
+          "smart_mode_entity": "Binary sensor/helper that enables controllers",
+          "night_mode_entity": "Binary sensor/helper that enables night mode",
+          "alarm_entity": "Alarm entity",
+          "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
           "alarm_notification_script_entity": "Alarm notification script"
         }
       }
@@ -36,18 +36,17 @@
       },
       "global_settings": {
         "title": "Edit global settings",
-        "description": "Update the shared global references used by all controllers.",
+        "description": "Specify the global entities shared by all controllers.",
         "data": {
-          "smart_mode_entity": "Smart mode active",
-          "night_mode_entity": "Night mode active",
-          "alarm_entity": "Alarm",
-          "alarm_timer_entity": "Alarm retardation",
+          "smart_mode_entity": "Binary sensor/helper that enables controllers",
+          "night_mode_entity": "Binary sensor/helper that enables night mode",
+          "alarm_entity": "Alarm entity",
+          "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
           "alarm_notification_script_entity": "Alarm notification script"
         }
       },
       "add_controller": {
-        "title": "Add switch/light controller",
-        "description": "Create a controller with required and optional runtime fields.",
+        "title": "New controller",
         "data": {
           "enabled": "Enabled",
           "main_entity": "Main switch/light",
@@ -55,12 +54,12 @@
           "activate_on_detection": "Turn on when motion/presence is detected",
           "detector_sensor_1": "Motion/Presence detector 1",
           "detector_sensor_2": "Motion/Presence detector 2",
-          "illuminance_threshold_entity": "Turn on if illuminance is below",
+          "illuminance_threshold_entity": "Turn on if the illuminance selector value is below",
           "illuminance_sensor": "Illuminance sensor",
-          "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+          "turn_off_when_presence_clears": "Turn off when the detector resets (may turn off before delay)",
           "wait_time": "Turn off delay (unless detector clears first)",
           "notify_with_alarm": "Notify when turn on and alarm is actived",
-          "turn_off_entity_1": "On turn on, turn off the switch/light 1",
+          "turn_off_entity_1": "When the main switch/light turns on, turn off switch/light 1",
           "turn_off_entity_2": "On turn on, turn off the switch/light 2"
         }
       },
@@ -80,8 +79,7 @@
         }
       },
       "edit_controller": {
-        "title": "Edit controller",
-        "description": "Update the selected controller.",
+        "title": "Controller editing",
         "data": {
           "enabled": "Enabled",
           "main_entity": "Main switch/light",
@@ -89,13 +87,13 @@
           "activate_on_detection": "Turn on when motion/presence is detected",
           "detector_sensor_1": "Motion/Presence detector 1",
           "detector_sensor_2": "Motion/Presence detector 2",
-          "illuminance_threshold_entity": "Turn on if illuminance is below",
+          "illuminance_threshold_entity": "Turn on if the illuminance selector value is below",
           "illuminance_sensor": "Illuminance sensor",
           "wait_time": "Turn off delay (unless detector clears first)",
-          "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+          "turn_off_when_presence_clears": "Turn off when the detector resets (may turn off before delay)",
           "notify_with_alarm": "Notify when turn on and alarm is actived",
-          "turn_off_entity_1": "On turn on, turn off 1",
-          "turn_off_entity_2": "On turn on, turn off 2"
+          "turn_off_entity_1": "When the main switch/light turns on, turn off switch/light 1",
+          "turn_off_entity_2": "When the main switch/light turns on, turn off switch/light 2"
         }
       },
       "delete_controller": {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.5
+
+- Reordered the controller form so `turn_off_when_presence_clears` appears directly below `activate_on_detection`.
+- Refined the controller and global settings wording across the base strings, Catalan, English, and Spanish translations for clearer Home Assistant UI labels.
+- Corrected the Catalan controller validation messages to use `el llum` consistently.
+
 ## 0.3.4
 
 - Added a short startup grace window before reporting configured entities as unavailable, reducing false warnings for detectors that restore a few seconds after Home Assistant reaches `running`.
