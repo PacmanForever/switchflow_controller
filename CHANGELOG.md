@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.6
+
+- Skipped `turn_on` and `turn_off` service calls for configured entities that are missing or currently unavailable, avoiding Home Assistant target warnings for stale or temporarily unavailable lights and switches.
+- Added unit and runtime regression coverage for both the normal available-entity path and the unavailable-entity skip path.
+
 ## 0.3.5
 
 - Reordered the controller form so `turn_off_when_presence_clears` appears directly below `activate_on_detection`.
