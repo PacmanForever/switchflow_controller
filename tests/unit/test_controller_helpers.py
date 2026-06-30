@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from homeassistant.core import CoreState
-from homeassistant.const import STATE_IDLE
+from homeassistant.const import STATE_IDLE, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import Event, State
 
 from custom_components.switchflow_controller.controller import ControllerRuntime
@@ -216,6 +216,39 @@ async def test_force_operations_delegate_to_helper_paths(hass) -> None:
 
 
 @pytest.mark.asyncio
+async def test_service_helpers_skip_missing_or_unavailable_entities(hass) -> None:
+    """Service helpers should not call Home Assistant for missing or unavailable entities."""
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), _controller(), "entry-1")
+    turn_on_calls: list[dict] = []
+    turn_off_calls: list[dict] = []
+
+    async def handle_light_turn_on(call) -> None:
+        turn_on_calls.append(call.data)
+
+    async def handle_light_turn_off(call) -> None:
+        turn_off_calls.append(call.data)
+
+    hass.services.async_register("light", "turn_on", handle_light_turn_on)
+    hass.services.async_register("light", "turn_off", handle_light_turn_off)
+
+    await runtime._async_turn_on_entity("light.missing")
+    hass.states.async_set("light.unavailable", STATE_UNAVAILABLE)
+    await runtime._async_turn_off_entity("light.unavailable")
+    hass.states.async_set("light.unknown", STATE_UNKNOWN)
+    await runtime._async_turn_on_entity("light.unknown")
+
+    assert turn_on_calls == []
+    assert turn_off_calls == []
+
+    hass.states.async_set("light.ready", "off")
+
+    await runtime._async_turn_on_entity("light.ready")
+
+    assert turn_on_calls == [{"entity_id": "light.ready"}]
+
+
+@pytest.mark.asyncio
 async def test_handle_main_entity_event_covers_on_off_and_missing_state(hass) -> None:
     """Main entity changes should shut secondaries down and cancel timers correctly."""
 
@@ -366,6 +399,7 @@ async def test_alarm_notification_negative_branches_and_script_unavailable(hass)
     assert await runtime._async_run_alarm_notification_path() is False
 
     hass.states.async_set("timer.house", STATE_IDLE)
+    hass.states.async_set("light.hallway", "off")
     light_calls: list[dict] = []
 
     async def handle_light_turn_on(call) -> None:

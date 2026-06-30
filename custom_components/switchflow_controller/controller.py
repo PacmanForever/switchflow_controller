@@ -431,6 +431,13 @@ class ControllerRuntime:
         state = self.hass.states.get(entity_id)
         return state is not None and state.state == STATE_ON
 
+    def _is_entity_service_available(self, entity_id: str | None) -> bool:
+        """Return whether an entity can safely receive a service call."""
+        if entity_id is None:
+            return False
+        state = self.hass.states.get(entity_id)
+        return state is not None and state.state not in {STATE_UNAVAILABLE, STATE_UNKNOWN}
+
     async def _async_turn_off_controlled_entities(self) -> None:
         """Turn off the main and night entities if they are on."""
         await self._async_turn_off_entity(self.controller.main_entity)
@@ -447,7 +454,7 @@ class ControllerRuntime:
 
     async def _async_turn_on_entity(self, entity_id: str | None) -> None:
         """Turn on an entity when it is configured."""
-        if entity_id is None:
+        if not self._is_entity_service_available(entity_id):
             return
 
         await self.hass.services.async_call(
@@ -459,7 +466,7 @@ class ControllerRuntime:
 
     async def _async_turn_off_entity(self, entity_id: str | None) -> None:
         """Turn off an entity when it is configured."""
-        if entity_id is None:
+        if not self._is_entity_service_available(entity_id):
             return
 
         await self.hass.services.async_call(

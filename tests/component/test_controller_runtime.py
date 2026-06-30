@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
+from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import Event, State
 
 from custom_components.switchflow_controller.controller import ControllerRuntime
@@ -152,6 +153,80 @@ async def test_manual_main_on_restarts_timer_and_turns_off_secondaries(hass) -> 
     )
 
     runtime._async_turn_off_configured_entities.assert_awaited_once_with(["light.other", None])
+    runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_manual_main_on_turns_off_available_secondary_entity(hass) -> None:
+    """Manual main activation should still call the secondary turn-off service when available."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "turn_off_entity_1": "light.other",
+            "wait_time": 120,
+        }
+    )
+    turn_off_calls: list[dict] = []
+
+    async def handle_light_turn_off(call) -> None:
+        turn_off_calls.append(call.data)
+
+    hass.services.async_register("light", "turn_off", handle_light_turn_off)
+    hass.states.async_set("light.other", "on")
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime._async_handle_main_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway",
+                "new_state": State("light.hallway", "on"),
+            },
+        )
+    )
+
+    assert turn_off_calls == [{"entity_id": "light.other"}]
+    runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_manual_main_on_skips_unavailable_secondary_entity(hass) -> None:
+    """Manual main activation should not call turn-off services for unavailable secondaries."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "turn_off_entity_1": "light.other",
+            "wait_time": 120,
+        }
+    )
+    turn_off_calls: list[dict] = []
+
+    async def handle_light_turn_off(call) -> None:
+        turn_off_calls.append(call.data)
+
+    hass.services.async_register("light", "turn_off", handle_light_turn_off)
+    hass.states.async_set("light.other", STATE_UNAVAILABLE)
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime._async_handle_main_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway",
+                "new_state": State("light.hallway", "on"),
+            },
+        )
+    )
+
+    assert turn_off_calls == []
     runtime._async_restart_timer.assert_awaited_once()
 
 
