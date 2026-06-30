@@ -10,7 +10,7 @@
           "night_mode_entity": "Sensor binario/booleano que habilita el modo noche",
           "alarm_entity": "Entidad de alarma",
           "alarm_timer_entity": "Temporizador de retardo de la alarma (no notifica la alarma si está activo)",
-          "alarm_notification_script_entity": "Script de notificación de la alarma (debe recibir solo un parámetro 'message')"
+          "alarm_notification_script_entity": "Script de notificación de la alarma (recibe message, controller_name y trigger_entity_id)"
         }
       }
     },
@@ -42,7 +42,7 @@
           "night_mode_entity": "Sensor binario/booleano que habilita el modo noche",
           "alarm_entity": "Entidad de alarma",
           "alarm_timer_entity": "Temporizador de retardo de la alarma (no notifica la alarma si está activo)",
-          "alarm_notification_script_entity": "Script de notificación de la alarma (debe recibir solo un parámetro 'message')"
+          "alarm_notification_script_entity": "Script de notificación de la alarma (recibe message, controller_name y trigger_entity_id)"
         }
       }
     },

@@ -53,5 +53,9 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
     assert activated is True
     assert light_calls == [{"entity_id": "light.hallway"}]
     assert script_calls
+    assert (
+        script_calls[0]["message"]
+        == "SwitchFlow Controller alarm notification from Hallway"
+    )
     assert script_calls[0]["controller_name"] == "Hallway"
     assert script_calls[0]["trigger_entity_id"] == "binary_sensor.hallway_motion"

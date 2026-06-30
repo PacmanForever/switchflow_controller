@@ -10,7 +10,7 @@
           "night_mode_entity": "Sensor binari/booleà que habilita el mode nit",
           "alarm_entity": "Entitat alarma",
           "alarm_timer_entity": "Temporitzador de retard de l'alarma (no notifica alarma si està actiu)",
-          "alarm_notification_script_entity": "Script de notificació de l'alarma (ha de rebre només un paràmetre 'message')"
+          "alarm_notification_script_entity": "Script de notificació de l'alarma (rep message, controller_name i trigger_entity_id)"
         }
       }
     },
@@ -42,7 +42,7 @@
           "night_mode_entity": "Sensor binari/booleà que habilita el mode nit",
           "alarm_entity": "Entitat alarma",
           "alarm_timer_entity": "Temporitzador de retard de l'alarma (no notifica alarma si està actiu)",
-          "alarm_notification_script_entity": "Script de notificació de l'alarma (ha de rebre només un paràmetre 'message')"
+          "alarm_notification_script_entity": "Script de notificació de l'alarma (rep message, controller_name i trigger_entity_id)"
         }
       }
     },

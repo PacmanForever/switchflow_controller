@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.8
+
+- Aligned the README controller examples and detector wording with the real config keys and current motion/presence behavior.
+- Clarified the alarm notification script label across the base strings, Catalan, English, and Spanish translations to match the actual `message`, `controller_name`, and `trigger_entity_id` payload.
+- Added explicit regression coverage to verify that alarm notification scripts receive the `message` field.
+
 ## 0.3.7
 
 - Removed the extra add/edit controller form descriptions so those controller forms show only their titles and fields.

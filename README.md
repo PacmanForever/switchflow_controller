@@ -21,7 +21,7 @@ A community Home Assistant custom integration for managing reusable motion-drive
 
 - Shared global configuration for house-wide helpers and alarm-related references
 - Multiple independent controllers for lights or switches
-- Motion-based activation with optional night-mode behavior
+- Motion/presence-based activation with optional night-mode behavior
 - Optional illuminance threshold gating
 - Delayed shutoff with motion-clear waiting
 - Optional per-controller alarm notification behavior
@@ -82,13 +82,13 @@ Typical examples:
 
 - one bathroom light
 - one hallway light with a separate night light
-- one staircase light zone with two motion sensors
+- one staircase light zone with two motion/presence detectors
 
 Each controller can define:
 
 - a main entity
 - an optional night entity
-- up to two motion sensors
+- up to two motion/presence detectors
 - an optional illuminance sensor
 - an optional illuminance threshold entity
 - a wait time before shutoff
@@ -154,7 +154,7 @@ The notification action must be configured as a `script` entity, not as a free-f
 
 If no notification script is configured, the controller skips notification safely.
 
-The script is called through the `script` domain and receives at least these fields:
+The script is called through the `script` domain and currently receives these fields:
 
 - `message`
 - `controller_name`
@@ -178,16 +178,16 @@ max_exceeded: silent
 ### Bathroom Controller
 
 - `main_entity`: bathroom light
-- `motion_sensor_1`: bathroom motion sensor
+- `detector_sensor_1`: bathroom motion sensor
 - `wait_time`: 2 minutes
-- `activate_on_motion`: enabled
+- `activate_on_detection`: enabled
 - `notify_with_alarm`: disabled
 
 ### Hallway Controller With Night Light
 
 - `main_entity`: hallway main light
 - `night_entity`: hallway night light
-- `motion_sensor_1`: hallway motion sensor
+- `detector_sensor_1`: hallway motion sensor
 - `illuminance_sensor`: hallway lux sensor
 - `wait_time`: 2 minutes
 - `notify_with_alarm`: enabled
@@ -195,8 +195,8 @@ max_exceeded: silent
 ### Staircase Controller With Two Motion Sensors
 
 - `main_entity`: staircase light
-- `motion_sensor_1`: downstairs staircase motion sensor
-- `motion_sensor_2`: upstairs staircase motion sensor
+- `detector_sensor_1`: downstairs staircase motion sensor
+- `detector_sensor_2`: upstairs staircase motion sensor
 - `wait_time`: 3 minutes
 - `notify_with_alarm`: enabled
 
@@ -217,7 +217,7 @@ A future version may provide migration helpers, but that is intentionally out of
 
 ## Services
 
-The current `0.1` service surface is intentionally small.
+The current service surface is intentionally small.
 
 Available services:
 

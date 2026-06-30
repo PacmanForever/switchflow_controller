@@ -10,7 +10,7 @@
           "night_mode_entity": "Binary sensor/helper that enables night mode",
           "alarm_entity": "Alarm entity",
           "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
-          "alarm_notification_script_entity": "Alarm notification script (must accept only one 'message' parameter)"
+          "alarm_notification_script_entity": "Alarm notification script (receives message, controller_name, and trigger_entity_id)"
         }
       }
     },
@@ -42,7 +42,7 @@
           "night_mode_entity": "Binary sensor/helper that enables night mode",
           "alarm_entity": "Alarm entity",
           "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
-          "alarm_notification_script_entity": "Alarm notification script (must accept only one 'message' parameter)"
+          "alarm_notification_script_entity": "Alarm notification script (receives message, controller_name, and trigger_entity_id)"
         }
       },
       "add_controller": {
