@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.7
+
+- Removed the extra add/edit controller form descriptions so those controller forms show only their titles and fields.
+- Clarified the shared global smart-mode and alarm-notification-script labels across the base strings, Catalan, English, and Spanish translations.
+- Reordered the README language list to show English, Spanish, and Catalan.
+
 ## 0.3.6
 
 - Skipped `turn_on` and `turn_off` service calls for configured entities that are missing or currently unavailable, avoiding Home Assistant target warnings for stale or temporarily unavailable lights and switches.

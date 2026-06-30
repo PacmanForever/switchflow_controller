@@ -6,11 +6,11 @@
         "title": "Configurar SwitchFlow Controller",
         "description": "Configura las referencias globales compartidas que usan los controladores.",
         "data": {
-          "smart_mode_entity": "Sensor binario/booleano que habilita los controladores",
+          "smart_mode_entity": "Sensor binario/booleano que habilita los controladores (si están activados)",
           "night_mode_entity": "Sensor binario/booleano que habilita el modo noche",
           "alarm_entity": "Entidad de alarma",
           "alarm_timer_entity": "Temporizador de retardo de la alarma (no notifica la alarma si está activo)",
-          "alarm_notification_script_entity": "Script de notificación de la alarma"
+          "alarm_notification_script_entity": "Script de notificación de la alarma (debe recibir solo un parámetro 'message')"
         }
       }
     },
@@ -38,11 +38,11 @@
         "title": "Editar la configuración global",
         "description": "Indica las entidades globales compartidas entre todos los controladores.",
         "data": {
-          "smart_mode_entity": "Sensor binario/booleano que habilita los controladores",
+          "smart_mode_entity": "Sensor binario/booleano que habilita los controladores (si están activados)",
           "night_mode_entity": "Sensor binario/booleano que habilita el modo noche",
           "alarm_entity": "Entidad de alarma",
           "alarm_timer_entity": "Temporizador de retardo de la alarma (no notifica la alarma si está activo)",
-          "alarm_notification_script_entity": "Script de notificación de la alarma"
+          "alarm_notification_script_entity": "Script de notificación de la alarma (debe recibir solo un parámetro 'message')"
         }
       }
     },

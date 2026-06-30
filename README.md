@@ -33,8 +33,8 @@ A community Home Assistant custom integration for managing reusable motion-drive
 The integration UI is currently available in:
 
 - English
-- Catalan
 - Spanish
+- Catalan
 
 ## Installation
 

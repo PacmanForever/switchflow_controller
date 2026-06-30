@@ -6,11 +6,11 @@
         "title": "Set up SwitchFlow Controller",
         "description": "Configure the shared global references used by controllers.",
         "data": {
-          "smart_mode_entity": "Binary sensor/helper that enables controllers",
+          "smart_mode_entity": "Binary sensor/helper that enables controllers (if they are enabled)",
           "night_mode_entity": "Binary sensor/helper that enables night mode",
           "alarm_entity": "Alarm entity",
           "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
-          "alarm_notification_script_entity": "Alarm notification script"
+          "alarm_notification_script_entity": "Alarm notification script (must accept only one 'message' parameter)"
         }
       }
     },
@@ -38,11 +38,11 @@
         "title": "Edit global settings",
         "description": "Specify the global entities shared by all controllers.",
         "data": {
-          "smart_mode_entity": "Binary sensor/helper that enables controllers",
+          "smart_mode_entity": "Binary sensor/helper that enables controllers (if they are enabled)",
           "night_mode_entity": "Binary sensor/helper that enables night mode",
           "alarm_entity": "Alarm entity",
           "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
-          "alarm_notification_script_entity": "Alarm notification script"
+          "alarm_notification_script_entity": "Alarm notification script (must accept only one 'message' parameter)"
         }
       },
       "add_controller": {
@@ -127,7 +127,6 @@
       "step": {
         "user": {
           "title": "Add controller",
-          "description": "Create a controller with required and optional runtime fields.",
           "data": {
             "enabled": "Enabled",
             "main_entity": "Main switch/light",
@@ -146,7 +145,6 @@
         },
         "reconfigure": {
           "title": "Edit controller",
-          "description": "Update the selected controller.",
           "data": {
             "enabled": "Enabled",
             "main_entity": "Main switch/light",
