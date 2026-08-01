@@ -67,6 +67,78 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
 
 
 @pytest.mark.asyncio
+async def test_armed_motion_uses_opening_alarm_light_timer(hass) -> None:
+    """An armed motion alarm response uses the global opening-light duration."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "detector_sensor_1": "binary_sensor.hallway_motion",
+            "wait_time": 600,
+            "notify_with_alarm": True,
+        }
+    )
+    global_config = GlobalConfig.from_mapping(
+        {
+            "alarm_entity": "alarm_control_panel.house",
+            "alarm_notification_script_entity": "script.notify_alarm",
+            "opening_alarm_light_duration": 60,
+        }
+    )
+
+    hass.services.async_register("script", "notify_alarm", AsyncMock())
+    hass.states.async_set("light.hallway", "off")
+    hass.states.async_set("binary_sensor.hallway_motion", "on")
+    hass.states.async_set("alarm_control_panel.house", "armed_away")
+    hass.states.async_set("script.notify_alarm", "off")
+    runtime = ControllerRuntime(hass, global_config, controller, "entry-1")
+    runtime._async_turn_on_entity = AsyncMock()
+    runtime._async_cancel_timer = AsyncMock()
+    runtime._async_restart_timer = AsyncMock()
+    runtime._async_restart_opening_alarm_timer = AsyncMock()
+
+    await runtime._async_handle_detector_state_change(
+        State("binary_sensor.hallway_motion", "on")
+    )
+
+    runtime._async_turn_on_entity.assert_awaited_once_with("light.hallway")
+    runtime._async_cancel_timer.assert_awaited_once()
+    runtime._async_restart_opening_alarm_timer.assert_awaited_once()
+    runtime._async_restart_timer.assert_not_awaited()
+    assert runtime._opening_alarm_owns_main is True
+
+
+@pytest.mark.asyncio
+async def test_normal_motion_uses_controller_wait_timer(hass) -> None:
+    """A non-alarm motion activation retains the controller wait timer."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "detector_sensor_1": "binary_sensor.hallway_motion",
+            "wait_time": 600,
+            "activate_on_detection": True,
+        }
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_run_alarm_notification_path = AsyncMock(return_value=False)
+    runtime._async_run_detection_activation_path = AsyncMock(return_value=True)
+    runtime._async_restart_timer = AsyncMock()
+    runtime._async_restart_opening_alarm_timer = AsyncMock()
+    hass.states.async_set("light.hallway", "off")
+
+    await runtime._async_handle_detector_state_change(
+        State("binary_sensor.hallway_motion", "on")
+    )
+
+    runtime._async_restart_timer.assert_awaited_once()
+    runtime._async_restart_opening_alarm_timer.assert_not_awaited()
+    assert runtime._opening_alarm_owns_main is False
+
+
+@pytest.mark.asyncio
 async def test_opening_alarm_notifies_and_owns_an_off_main_light(hass) -> None:
     """An armed window opening notifies and starts its own light timer."""
     controller = ControllerConfig.from_mapping(
@@ -107,6 +179,10 @@ async def test_opening_alarm_notifies_and_owns_an_off_main_light(hass) -> None:
     runtime._async_turn_on_entity.assert_awaited_once_with("light.hallway")
     runtime._async_restart_opening_alarm_timer.assert_awaited_once()
     assert runtime._opening_alarm_owns_main is True
+    assert (
+        script_calls[0]["message"]
+        == "SwitchFlow Controller alarm notification from Hallway"
+    )
     assert script_calls[0]["trigger_entity_id"] == "binary_sensor.hallway_window"
 
 

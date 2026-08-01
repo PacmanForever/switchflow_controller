@@ -246,9 +246,20 @@ class ControllerRuntime:
                 )
                 return
 
-            activated = await self._async_run_alarm_notification_path()
+            main_was_on = await self._async_is_entity_on(
+                self.controller.main_entity,
+                field_name=CONF_MAIN_ENTITY,
+            )
+            alarm_activated = await self._async_run_alarm_notification_path()
+            activated = alarm_activated
             if self.controller.activate_on_detection:
                 activated = await self._async_run_detection_activation_path() or activated
+
+            if alarm_activated and not main_was_on:
+                self._opening_alarm_owns_main = True
+                await self._async_cancel_timer()
+                await self._async_restart_opening_alarm_timer()
+                return
 
             if activated or await self._async_any_controlled_entity_on():
                 await self._async_restart_timer()

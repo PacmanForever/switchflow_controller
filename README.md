@@ -164,6 +164,8 @@ When the controller's main entity is off, an eligible opening turns it on for th
 
 When the opening-response timer finishes, it turns off the main entity only when that response originally turned it on. It does not interfere with the normal motion/presence shutdown timer.
 
+When armed motion triggers the per-controller alarm notification path and turns on an off main entity, it uses the same `opening_alarm_light_duration`. Motion that does not activate this alarm path continues to use the controller's normal `wait_time`.
+
 ## Alarm Notifications
 
 Alarm notifications are split into two parts:

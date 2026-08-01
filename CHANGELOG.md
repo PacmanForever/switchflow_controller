@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2
+
+- Fixed alarm-driven motion activation so a main light it turns on is switched off after the shared `opening_alarm_light_duration`, matching the armed window and door response. Normal motion activation continues to use the controller-specific `wait_time`.
+- Added regression coverage for both alarm-driven and normal motion timer behavior.
+
 ## 0.4.1
 
 - Added a concise explanation to the Windows and doors controller step so users know that an armed opening sends a notification and can turn on the main switch/light.
