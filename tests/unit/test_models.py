@@ -10,6 +10,10 @@ from custom_components.switchflow_controller.const import (
     CONF_ILLUMINANCE_THRESHOLD_ENTITY,
     CONF_ILLUMINANCE_THRESHOLD_LUX,
     CONF_MAIN_ENTITY,
+    CONF_OPENING_ALARM_LIGHT_DURATION,
+    CONF_OPENING_SENSOR_1,
+    CONF_OPENING_SENSOR_2,
+    CONF_USE_NIGHT_ENTITY_NAME,
     CONF_WAIT_TIME,
 )
 from custom_components.switchflow_controller.models import (
@@ -26,6 +30,7 @@ def test_global_config_omits_empty_optional_fields() -> None:
     """Empty optional global values should not be persisted."""
     config = GlobalConfig.from_mapping({})
     assert config.as_dict() == {}
+    assert config.opening_alarm_light_duration == 60
 
 
 def test_controller_config_requires_wait_time() -> None:
@@ -48,6 +53,9 @@ def test_controller_config_normalizes_payload() -> None:
             "name": "Hallway",
             CONF_MAIN_ENTITY: "light.hallway",
             CONF_ILLUMINANCE_THRESHOLD_LUX: "12.5",
+            CONF_OPENING_SENSOR_1: "binary_sensor.hallway_window",
+            CONF_OPENING_SENSOR_2: "binary_sensor.hallway_door",
+            CONF_USE_NIGHT_ENTITY_NAME: True,
             CONF_WAIT_TIME: 120,
         }
     )
@@ -56,6 +64,10 @@ def test_controller_config_normalizes_payload() -> None:
     assert controller.illuminance_threshold_lux == 12.5
     assert controller.wait_time == 120
     assert controller.activate_on_detection is False
+    assert controller.use_night_entity_name is True
+    assert controller.as_dict()[CONF_USE_NIGHT_ENTITY_NAME] is True
+    assert controller.opening_sensor_1 == "binary_sensor.hallway_window"
+    assert controller.opening_sensor_2 == "binary_sensor.hallway_door"
 
 
 def test_normalizers_cover_invalid_and_empty_values() -> None:
@@ -105,6 +117,7 @@ def test_global_config_and_controller_validations_cover_required_fields() -> Non
             "alarm_entity": "alarm_control_panel.house",
             "alarm_timer_entity": "timer.house",
             "alarm_notification_script_entity": "script.notify_house",
+            CONF_OPENING_ALARM_LIGHT_DURATION: {"minutes": 2},
         }
     )
     assert config.as_dict() == {
@@ -113,6 +126,7 @@ def test_global_config_and_controller_validations_cover_required_fields() -> Non
         "alarm_entity": "alarm_control_panel.house",
         "alarm_timer_entity": "timer.house",
         "alarm_notification_script_entity": "script.notify_house",
+        CONF_OPENING_ALARM_LIGHT_DURATION: 120,
     }
 
     with pytest.raises(ValueError, match="controller id is required"):

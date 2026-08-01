@@ -23,11 +23,16 @@ from .const import (
     CONF_NIGHT_ENTITY,
     CONF_NIGHT_MODE_ENTITY,
     CONF_NOTIFY_WITH_ALARM,
+    CONF_OPENING_ALARM_LIGHT_DURATION,
+    CONF_OPENING_SENSOR_1,
+    CONF_OPENING_SENSOR_2,
     CONF_SMART_MODE_ENTITY,
     CONF_TURN_OFF_ENTITY_1,
     CONF_TURN_OFF_ENTITY_2,
     CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
+    CONF_USE_NIGHT_ENTITY_NAME,
     CONF_WAIT_TIME,
+    DEFAULT_OPENING_ALARM_LIGHT_DURATION_SECONDS,
     DEFAULT_WAIT_TIME_SECONDS,
 )
 
@@ -101,6 +106,7 @@ class GlobalConfig:
     alarm_entity: str | None = None
     alarm_timer_entity: str | None = None
     alarm_notification_script_entity: str | None = None
+    opening_alarm_light_duration: int = DEFAULT_OPENING_ALARM_LIGHT_DURATION_SECONDS
 
     @classmethod
     def from_mapping(cls, data: dict[str, Any] | None) -> "GlobalConfig":
@@ -113,6 +119,12 @@ class GlobalConfig:
             alarm_timer_entity=_normalize_entity_id(source.get(CONF_ALARM_TIMER_ENTITY)),
             alarm_notification_script_entity=_normalize_entity_id(
                 source.get(CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY)
+            ),
+            opening_alarm_light_duration=_normalize_wait_time(
+                source.get(
+                    CONF_OPENING_ALARM_LIGHT_DURATION,
+                    DEFAULT_OPENING_ALARM_LIGHT_DURATION_SECONDS,
+                )
             ),
         )
 
@@ -131,6 +143,8 @@ class GlobalConfig:
             result[CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY] = (
                 self.alarm_notification_script_entity
             )
+        if self.opening_alarm_light_duration != DEFAULT_OPENING_ALARM_LIGHT_DURATION_SECONDS:
+            result[CONF_OPENING_ALARM_LIGHT_DURATION] = self.opening_alarm_light_duration
         return result
 
 
@@ -146,12 +160,15 @@ class ControllerConfig:
     night_entity: str | None = None
     detector_sensor_1: str | None = None
     detector_sensor_2: str | None = None
+    opening_sensor_1: str | None = None
+    opening_sensor_2: str | None = None
     illuminance_sensor: str | None = None
     illuminance_threshold_lux: float | None = None
     illuminance_threshold_entity: str | None = None
     turn_off_when_presence_clears: bool = False
     activate_on_detection: bool = False
     notify_with_alarm: bool = False
+    use_night_entity_name: bool = False
     turn_off_entity_1: str | None = None
     turn_off_entity_2: str | None = None
     area_id: str | None = None
@@ -179,6 +196,8 @@ class ControllerConfig:
             night_entity=_normalize_entity_id(data.get(CONF_NIGHT_ENTITY)),
             detector_sensor_1=_normalize_entity_id(data.get(CONF_DETECTOR_SENSOR_1)),
             detector_sensor_2=_normalize_entity_id(data.get(CONF_DETECTOR_SENSOR_2)),
+            opening_sensor_1=_normalize_entity_id(data.get(CONF_OPENING_SENSOR_1)),
+            opening_sensor_2=_normalize_entity_id(data.get(CONF_OPENING_SENSOR_2)),
             illuminance_sensor=_normalize_entity_id(data.get(CONF_ILLUMINANCE_SENSOR)),
             illuminance_threshold_lux=_normalize_optional_float(
                 data.get(CONF_ILLUMINANCE_THRESHOLD_LUX)
@@ -195,6 +214,9 @@ class ControllerConfig:
             notify_with_alarm=_normalize_bool(
                 data.get(CONF_NOTIFY_WITH_ALARM), default=False
             ),
+            use_night_entity_name=_normalize_bool(
+                data.get(CONF_USE_NIGHT_ENTITY_NAME), default=False
+            ),
             turn_off_entity_1=_normalize_entity_id(data.get(CONF_TURN_OFF_ENTITY_1)),
             turn_off_entity_2=_normalize_entity_id(data.get(CONF_TURN_OFF_ENTITY_2)),
             area_id=_normalize_entity_id(data.get(CONF_AREA_ID)),
@@ -210,6 +232,8 @@ class ControllerConfig:
             CONF_NIGHT_ENTITY: self.night_entity,
             CONF_DETECTOR_SENSOR_1: self.detector_sensor_1,
             CONF_DETECTOR_SENSOR_2: self.detector_sensor_2,
+            CONF_OPENING_SENSOR_1: self.opening_sensor_1,
+            CONF_OPENING_SENSOR_2: self.opening_sensor_2,
             CONF_ILLUMINANCE_SENSOR: self.illuminance_sensor,
             CONF_ILLUMINANCE_THRESHOLD_LUX: self.illuminance_threshold_lux,
             CONF_ILLUMINANCE_THRESHOLD_ENTITY: self.illuminance_threshold_entity,
@@ -217,6 +241,7 @@ class ControllerConfig:
             CONF_TURN_OFF_WHEN_PRESENCE_CLEARS: self.turn_off_when_presence_clears,
             CONF_ACTIVATE_ON_DETECTION: self.activate_on_detection,
             CONF_NOTIFY_WITH_ALARM: self.notify_with_alarm,
+            CONF_USE_NIGHT_ENTITY_NAME: self.use_night_entity_name,
             CONF_TURN_OFF_ENTITY_1: self.turn_off_entity_1,
             CONF_TURN_OFF_ENTITY_2: self.turn_off_entity_2,
             CONF_AREA_ID: self.area_id,

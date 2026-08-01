@@ -10,7 +10,8 @@
           "night_mode_entity": "Sensor binario/booleano que habilita el modo noche",
           "alarm_entity": "Entidad de alarma",
           "alarm_timer_entity": "Temporizador de retardo de la alarma (no notifica la alarma si está activo)",
-          "alarm_notification_script_entity": "Script de notificación de la alarma (recibe message, controller_name y trigger_entity_id)"
+          "alarm_notification_script_entity": "Script de notificación de la alarma (recibe message, controller_name y trigger_entity_id)",
+          "opening_alarm_light_duration": "Duración de la luz de alarma de ventanas y puertas"
         }
       }
     },
@@ -42,7 +43,8 @@
           "night_mode_entity": "Sensor binario/booleano que habilita el modo noche",
           "alarm_entity": "Entidad de alarma",
           "alarm_timer_entity": "Temporizador de retardo de la alarma (no notifica la alarma si está activo)",
-          "alarm_notification_script_entity": "Script de notificación de la alarma (recibe message, controller_name y trigger_entity_id)"
+          "alarm_notification_script_entity": "Script de notificación de la alarma (recibe message, controller_name y trigger_entity_id)",
+          "opening_alarm_light_duration": "Duración de la luz de alarma de ventanas y puertas"
         }
       }
     },
@@ -61,9 +63,9 @@
         "reconfigure_successful": "Controlador actualizado"
       },
       "error": {
-        "controlled_entity_already_configured": "La luz o interruptor principal o nocturno de este controlador ya se está usando en otro controlador.",
+        "controller_name_entity_already_configured": "Ya existe un controlador que usa esta luz o interruptor como nombre.",
         "main_and_night_entity_must_differ": "La luz o interruptor principal y el nocturno deben ser entidades diferentes.",
-        "main_entity_already_configured": "Ya existe un controlador con esta luz o interruptor principal."
+        "night_entity_required_for_name": "Selecciona una luz o interruptor nocturno para usar su nombre."
       },
       "entry_type": "Controlador",
       "initiate_flow": {
@@ -77,6 +79,7 @@
             "enabled": "Activado",
             "main_entity": "Luz o interruptor principal",
             "night_entity": "Luz o interruptor nocturno",
+            "use_night_entity_name": "Usar el nombre de la luz o interruptor nocturno",
             "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
             "detector_sensor_1": "Detector de movimiento o presencia 1",
             "detector_sensor_2": "Detector de movimiento o presencia 2",
@@ -95,6 +98,7 @@
             "enabled": "Activado",
             "main_entity": "Luz o interruptor principal",
             "night_entity": "Luz o interruptor nocturno",
+            "use_night_entity_name": "Usar el nombre de la luz o interruptor nocturno",
             "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
             "detector_sensor_1": "Detector de movimiento o presencia 1",
             "detector_sensor_2": "Detector de movimiento o presencia 2",
@@ -105,6 +109,46 @@
             "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
             "turn_off_entity_1": "Al encender la luz o interruptor principal, apagar la luz o interruptor 1",
             "turn_off_entity_2": "Al encender la luz o interruptor principal, apagar la luz o interruptor 2"
+          }
+        },
+        "motion_presence": {
+          "title": "Movimiento y presencia",
+          "data": {
+            "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
+            "turn_off_when_presence_clears": "Apagar cuando los detectores se restablezcan (puede apagarse antes del retardo)",
+            "detector_sensor_1": "Detector de movimiento o presencia 1",
+            "detector_sensor_2": "Detector de movimiento o presencia 2",
+            "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
+            "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
+            "illuminance_sensor": "Sensor de iluminancia",
+            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)"
+          }
+        },
+        "windows_doors": {
+          "title": "Ventanas y puertas",
+          "data": {
+            "opening_sensor_1": "Sensor de ventana o puerta 1",
+            "opening_sensor_2": "Sensor de ventana o puerta 2"
+          }
+        },
+        "reconfigure_motion_presence": {
+          "title": "Movimiento y presencia",
+          "data": {
+            "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
+            "turn_off_when_presence_clears": "Apagar cuando los detectores se restablezcan (puede apagarse antes del retardo)",
+            "detector_sensor_1": "Detector de movimiento o presencia 1",
+            "detector_sensor_2": "Detector de movimiento o presencia 2",
+            "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
+            "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
+            "illuminance_sensor": "Sensor de iluminancia",
+            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)"
+          }
+        },
+        "reconfigure_windows_doors": {
+          "title": "Ventanas y puertas",
+          "data": {
+            "opening_sensor_1": "Sensor de ventana o puerta 1",
+            "opening_sensor_2": "Sensor de ventana o puerta 2"
           }
         }
       }

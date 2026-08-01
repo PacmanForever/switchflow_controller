@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- Split controller creation and editing into clear **Switches and lights**, **Motion and presence**, and **Windows and doors** steps, including all English, Catalan, and Spanish translations.
+- Added two optional window/door opening sensors per controller and a shared opening-alarm light duration that defaults to one minute.
+- Added an armed-opening response: each `off` to `on` opening transition sends the configured alarm notification; when the main entity is off, it is turned on for the configured opening duration without interfering with the normal motion/presence timer.
+- Added ownership-aware opening timers so an opening restarts only its own light timer and never turns off a light that was already on manually or through motion handling.
+- Added the option to derive a controller name from its night entity, with duplicate-name validation limited to the entity selected as that controller's name source.
+- Changed the default motion shutoff delay to one hour and clarified the numeric lux threshold, activation, detector-clear, and alarm-notification configuration labels.
+- Updated the integration-page metadata so Home Assistant shows the controller action instead of a redundant base-entry action.
+
 ## 0.3.9
 
 - Switched the illuminance threshold from an entity-based selector to a numeric lux value while keeping legacy values compatible.

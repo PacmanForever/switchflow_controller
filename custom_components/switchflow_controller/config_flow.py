@@ -25,11 +25,16 @@ from .const import (
     CONF_NIGHT_ENTITY,
     CONF_NIGHT_MODE_ENTITY,
     CONF_NOTIFY_WITH_ALARM,
+    CONF_OPENING_ALARM_LIGHT_DURATION,
+    CONF_OPENING_SENSOR_1,
+    CONF_OPENING_SENSOR_2,
     CONF_SMART_MODE_ENTITY,
     CONF_TURN_OFF_ENTITY_1,
     CONF_TURN_OFF_ENTITY_2,
     CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
+    CONF_USE_NIGHT_ENTITY_NAME,
     CONF_WAIT_TIME,
+    DEFAULT_OPENING_ALARM_LIGHT_DURATION_SECONDS,
     DEFAULT_WAIT_TIME_SECONDS,
     DOMAIN,
     SUBENTRY_TYPE_CONTROLLER,
@@ -44,16 +49,12 @@ OPTIONAL_CONTROLLER_ENTITY_FIELDS = (
     CONF_NIGHT_ENTITY,
     CONF_DETECTOR_SENSOR_1,
     CONF_DETECTOR_SENSOR_2,
+    CONF_OPENING_SENSOR_1,
+    CONF_OPENING_SENSOR_2,
     CONF_ILLUMINANCE_SENSOR,
     CONF_TURN_OFF_ENTITY_1,
     CONF_TURN_OFF_ENTITY_2,
 )
-OWNED_CONTROLLER_ENTITY_FIELDS = (
-    CONF_MAIN_ENTITY,
-    CONF_NIGHT_ENTITY,
-)
-
-
 def _wait_time_selector_default(seconds: int) -> dict[str, int]:
     """Convert stored seconds into the duration selector shape."""
     hours, remainder = divmod(seconds, 3600)
@@ -143,16 +144,16 @@ def _entry_global_defaults(config_entry: config_entries.ConfigEntry) -> dict[str
 
 
 def _derive_controller_name(
-    hass, main_entity: str, *, fallback: str | None = None
+    hass, entity_id: str, *, fallback: str | None = None
 ) -> str:
-    """Build a controller display name from the main entity."""
-    state = hass.states.get(main_entity)
+    """Build a controller display name from its selected entity."""
+    state = hass.states.get(entity_id)
     if state is not None:
         friendly_name = state.attributes.get("friendly_name")
         if isinstance(friendly_name, str) and friendly_name.strip():
             return friendly_name.strip()
 
-    object_id = main_entity.partition(".")[2].strip()
+    object_id = entity_id.partition(".")[2].strip()
     if object_id:
         return object_id.replace("_", " ").strip().title()
 
@@ -175,7 +176,7 @@ def _optional_selector_field(
 
 def _build_global_config_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
     """Build the schema used by config and options flows."""
-    values = GlobalConfig.from_mapping(defaults).as_dict()
+    values = GlobalConfig.from_mapping(defaults)
     smart_mode_selector = selector.EntitySelector(
         selector.EntitySelectorConfig(
             domain=["binary_sensor", "input_boolean"],
@@ -200,31 +201,37 @@ def _build_global_config_schema(defaults: dict[str, Any] | None = None) -> vol.S
             _optional_selector_field(
                 CONF_SMART_MODE_ENTITY,
                 smart_mode_selector,
-                values.get(CONF_SMART_MODE_ENTITY),
+                values.smart_mode_entity,
             ): smart_mode_selector,
             _optional_selector_field(
                 CONF_NIGHT_MODE_ENTITY,
                 night_mode_selector,
-                values.get(CONF_NIGHT_MODE_ENTITY),
+                values.night_mode_entity,
             ): night_mode_selector,
             _optional_selector_field(
                 CONF_ALARM_ENTITY,
                 alarm_selector,
-                values.get(CONF_ALARM_ENTITY),
+                values.alarm_entity,
             ): alarm_selector,
             _optional_selector_field(
                 CONF_ALARM_TIMER_ENTITY,
                 alarm_timer_selector,
-                values.get(CONF_ALARM_TIMER_ENTITY),
+                values.alarm_timer_entity,
             ): alarm_timer_selector,
             _optional_selector_field(
                 CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY,
                 selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="script", multiple=False)
                 ),
-                values.get(CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY),
+                values.alarm_notification_script_entity,
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="script", multiple=False)
+            ),
+            vol.Required(
+                CONF_OPENING_ALARM_LIGHT_DURATION,
+                default=_wait_time_selector_default(values.opening_alarm_light_duration),
+            ): selector.DurationSelector(
+                selector.DurationSelectorConfig(enable_day=False, allow_negative=False)
             ),
         }
     )
@@ -232,7 +239,7 @@ def _build_global_config_schema(defaults: dict[str, Any] | None = None) -> vol.S
 
 def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
     """Build the schema for creating or editing a controller."""
-    values = ControllerConfig.from_mapping(defaults) if defaults else None
+    values = _controller_schema_values(defaults)
 
     main_entity_selector = selector.EntitySelector(
         selector.EntitySelectorConfig(domain=["light", "switch"], multiple=False)
@@ -266,6 +273,10 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
                 main_entity_selector,
                 values.night_entity if values else None,
             ): main_entity_selector,
+            vol.Required(
+                CONF_USE_NIGHT_ENTITY_NAME,
+                default=values.use_night_entity_name if values else False,
+            ): selector.BooleanSelector(),
             vol.Required(
                 CONF_ACTIVATE_ON_DETECTION,
                 default=values.activate_on_detection if values else False,
@@ -322,6 +333,135 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
         }
     )
 
+def _controller_schema_values(defaults: dict[str, Any] | None) -> ControllerConfig | None:
+    """Build schema values from complete or partial controller form data."""
+    if defaults is None:
+        return None
+    return ControllerConfig.from_mapping(
+        {
+            CONF_CONTROLLER_ID: defaults.get(CONF_CONTROLLER_ID, "controller"),
+            "name": defaults.get("name", "Controller"),
+            CONF_MAIN_ENTITY: defaults.get(CONF_MAIN_ENTITY, "light.controller"),
+            CONF_WAIT_TIME: defaults.get(CONF_WAIT_TIME, DEFAULT_WAIT_TIME_SECONDS),
+            **defaults,
+        }
+    )
+
+def _build_switches_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
+    """Build the first controller step for controlled switches and lights."""
+    values = _controller_schema_values(defaults)
+    entity_selector = selector.EntitySelector(
+        selector.EntitySelectorConfig(domain=["light", "switch"], multiple=False)
+    )
+    return vol.Schema(
+        {
+            vol.Required(CONF_ENABLED, default=values.enabled if values else True): selector.BooleanSelector(),
+            vol.Required(
+                CONF_MAIN_ENTITY,
+                default=values.main_entity if values else vol.UNDEFINED,
+            ): entity_selector,
+            _optional_selector_field(
+                CONF_NIGHT_ENTITY,
+                entity_selector,
+                values.night_entity if values else None,
+            ): entity_selector,
+            vol.Required(
+                CONF_USE_NIGHT_ENTITY_NAME,
+                default=values.use_night_entity_name if values else False,
+            ): selector.BooleanSelector(),
+            _optional_selector_field(
+                CONF_TURN_OFF_ENTITY_1,
+                entity_selector,
+                values.turn_off_entity_1 if values else None,
+            ): entity_selector,
+            _optional_selector_field(
+                CONF_TURN_OFF_ENTITY_2,
+                entity_selector,
+                values.turn_off_entity_2 if values else None,
+            ): entity_selector,
+        }
+    )
+
+
+def _build_motion_presence_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
+    """Build the second controller step for motion and presence behavior."""
+    values = _controller_schema_values(defaults)
+    detector_selector = selector.EntitySelector(
+        selector.EntitySelectorConfig(domain="binary_sensor", multiple=False)
+    )
+    sensor_selector = selector.EntitySelector(
+        selector.EntitySelectorConfig(domain="sensor", multiple=False)
+    )
+    illuminance_threshold_selector = selector.NumberSelector(
+        selector.NumberSelectorConfig(min=0, step=1, unit_of_measurement="lx")
+    )
+    return vol.Schema(
+        {
+            vol.Required(
+                CONF_ACTIVATE_ON_DETECTION,
+                default=values.activate_on_detection if values else False,
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
+                default=values.turn_off_when_presence_clears if values else False,
+            ): selector.BooleanSelector(),
+            _optional_selector_field(
+                CONF_DETECTOR_SENSOR_1,
+                detector_selector,
+                values.detector_sensor_1 if values else None,
+            ): detector_selector,
+            _optional_selector_field(
+                CONF_DETECTOR_SENSOR_2,
+                detector_selector,
+                values.detector_sensor_2 if values else None,
+            ): detector_selector,
+            vol.Required(
+                CONF_NOTIFY_WITH_ALARM,
+                default=values.notify_with_alarm if values else False,
+            ): selector.BooleanSelector(),
+            _optional_selector_field(
+                CONF_ILLUMINANCE_THRESHOLD_LUX,
+                illuminance_threshold_selector,
+                values.illuminance_threshold_lux if values else None,
+            ): illuminance_threshold_selector,
+            _optional_selector_field(
+                CONF_ILLUMINANCE_SENSOR,
+                sensor_selector,
+                values.illuminance_sensor if values else None,
+            ): sensor_selector,
+            vol.Required(
+                CONF_WAIT_TIME,
+                default=_wait_time_selector_default(
+                    values.wait_time if values else DEFAULT_WAIT_TIME_SECONDS
+                ),
+            ): selector.DurationSelector(
+                selector.DurationSelectorConfig(enable_day=False, allow_negative=False)
+            ),
+        }
+    )
+
+
+def _build_windows_doors_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
+    """Build the third controller step for window and door sensors."""
+    values = _controller_schema_values(defaults)
+    opening_selector = selector.EntitySelector(
+        selector.EntitySelectorConfig(domain="binary_sensor", multiple=False)
+    )
+    return vol.Schema(
+        {
+            _optional_selector_field(
+                CONF_OPENING_SENSOR_1,
+                opening_selector,
+                values.opening_sensor_1 if values else None,
+            ): opening_selector,
+            _optional_selector_field(
+                CONF_OPENING_SENSOR_2,
+                opening_selector,
+                values.opening_sensor_2 if values else None,
+            ): opening_selector,
+        }
+    )
+
 
 def _build_controller_select_schema(
     controllers: list[ControllerConfig],
@@ -351,19 +491,28 @@ def _build_controller_id(name: str, existing_ids: set[str]) -> str:
     return controller_id
 
 
-def _main_entity_in_use(
+def _controller_name_entity(
+    controller_input: dict[str, Any],
+) -> str | None:
+    """Return the entity from which a controller title is derived."""
+    if controller_input.get(CONF_USE_NIGHT_ENTITY_NAME):
+        return controller_input.get(CONF_NIGHT_ENTITY)
+    return controller_input.get(CONF_MAIN_ENTITY)
+
+
+def _controller_name_entity_in_use(
     entry: config_entries.ConfigEntry,
-    main_entity: str,
+    entity_id: str,
     *,
     ignore_subentry_id: str | None = None,
 ) -> bool:
-    """Return whether another controller subentry already uses this main entity."""
+    """Return whether another controller uses this entity as its title source."""
     for subentry in entry.subentries.values():
         if subentry.subentry_type != SUBENTRY_TYPE_CONTROLLER:
             continue
         if ignore_subentry_id is not None and subentry.subentry_id == ignore_subentry_id:
             continue
-        if subentry.data.get(CONF_MAIN_ENTITY) == main_entity:
+        if _controller_name_entity(dict(subentry.data)) == entity_id:
             return True
     return False
 
@@ -371,35 +520,6 @@ def _main_entity_in_use(
 def _main_and_night_entities_match(controller_input: dict[str, Any]) -> bool:
     """Return whether main and night entities point to the same entity."""
     return controller_input.get(CONF_MAIN_ENTITY) == controller_input.get(CONF_NIGHT_ENTITY)
-
-
-def _controlled_entity_in_use(
-    entry: config_entries.ConfigEntry,
-    controller_input: dict[str, Any],
-    *,
-    ignore_subentry_id: str | None = None,
-) -> bool:
-    """Return whether another controller already owns a main or night entity."""
-    controlled_entities = {
-        controller_input[field]
-        for field in OWNED_CONTROLLER_ENTITY_FIELDS
-        if controller_input.get(field) is not None
-    }
-    if not controlled_entities:
-        return False
-
-    for subentry in entry.subentries.values():
-        if subentry.subentry_type != SUBENTRY_TYPE_CONTROLLER:
-            continue
-        if ignore_subentry_id is not None and subentry.subentry_id == ignore_subentry_id:
-            continue
-
-        for field in OWNED_CONTROLLER_ENTITY_FIELDS:
-            entity_id = subentry.data.get(field)
-            if entity_id in controlled_entities:
-                return True
-
-    return False
 
 
 def _controller_schema_defaults(
@@ -491,6 +611,19 @@ class SwitchManagerOptionsFlow(config_entries.OptionsFlow):
 class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
     """Manage controller subentries shown on the integration page."""
 
+    def _step_defaults(
+        self,
+        *,
+        unique_id: str = "new_controller",
+        title: str = "Controller",
+    ) -> dict[str, Any]:
+        """Add the metadata needed to render a partial controller form."""
+        return {
+            **getattr(self, "_controller_input", {}),
+            CONF_CONTROLLER_ID: unique_id,
+            "name": title,
+        }
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.SubentryFlowResult:
@@ -498,18 +631,26 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
         entry = self._get_entry()
         errors: dict[str, str] = {}
 
+        if user_input is not None and CONF_WAIT_TIME not in user_input:
+            self._controller_input = dict(user_input)
+            return await self.async_step_motion_presence()
+
         if user_input is not None:
             normalized_input = _normalize_controller_input(user_input)
             if _main_and_night_entities_match(normalized_input):
                 errors["base"] = "main_and_night_entity_must_differ"
-            elif _main_entity_in_use(entry, normalized_input[CONF_MAIN_ENTITY]):
-                errors["base"] = "main_entity_already_configured"
-            elif _controlled_entity_in_use(entry, normalized_input):
-                errors["base"] = "controlled_entity_already_configured"
+            elif normalized_input.get(CONF_USE_NIGHT_ENTITY_NAME) and not normalized_input.get(
+                CONF_NIGHT_ENTITY
+            ):
+                errors["base"] = "night_entity_required_for_name"
+            elif _controller_name_entity_in_use(
+                entry, _controller_name_entity(normalized_input)
+            ):
+                errors["base"] = "controller_name_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
                     self.hass,
-                    normalized_input[CONF_MAIN_ENTITY],
+                    _controller_name_entity(normalized_input),
                 )
                 existing_ids = {
                     subentry.unique_id
@@ -525,17 +666,34 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=_build_controller_schema(
-                _controller_schema_defaults(
-                    user_input,
-                    unique_id="new_controller",
-                    title=_derive_controller_name(
-                        self.hass,
-                        (user_input or {}).get(CONF_MAIN_ENTITY, ""),
-                    ),
-                )
-            ),
+            data_schema=_build_switches_schema(),
             errors=errors,
+        )
+
+    async def async_step_motion_presence(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.SubentryFlowResult:
+        """Collect controller movement and presence settings."""
+        if user_input is not None:
+            self._controller_input = {**self._controller_input, **user_input}
+            return await self.async_step_windows_doors()
+
+        return self.async_show_form(
+            step_id="motion_presence",
+            data_schema=_build_motion_presence_schema(self._step_defaults()),
+        )
+
+    async def async_step_windows_doors(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.SubentryFlowResult:
+        """Collect window and door settings, then create the controller."""
+        if user_input is not None:
+            self._controller_input = {**self._controller_input, **user_input}
+            return await self.async_step_user(self._controller_input)
+
+        return self.async_show_form(
+            step_id="windows_doors",
+            data_schema=_build_windows_doors_schema(self._step_defaults()),
         )
 
     async def async_step_reconfigure(
@@ -546,26 +704,28 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
         subentry = self._get_reconfigure_subentry()
         errors: dict[str, str] = {}
 
+        if user_input is not None and CONF_WAIT_TIME not in user_input:
+            self._controller_input = {**dict(subentry.data), **user_input}
+            return await self.async_step_reconfigure_motion_presence()
+
         if user_input is not None:
             normalized_input = _normalize_controller_input(user_input)
             if _main_and_night_entities_match(normalized_input):
                 errors["base"] = "main_and_night_entity_must_differ"
-            elif _main_entity_in_use(
+            elif normalized_input.get(CONF_USE_NIGHT_ENTITY_NAME) and not normalized_input.get(
+                CONF_NIGHT_ENTITY
+            ):
+                errors["base"] = "night_entity_required_for_name"
+            elif _controller_name_entity_in_use(
                 entry,
-                normalized_input[CONF_MAIN_ENTITY],
+                _controller_name_entity(normalized_input),
                 ignore_subentry_id=subentry.subentry_id,
             ):
-                errors["base"] = "main_entity_already_configured"
-            elif _controlled_entity_in_use(
-                entry,
-                normalized_input,
-                ignore_subentry_id=subentry.subentry_id,
-            ):
-                errors["base"] = "controlled_entity_already_configured"
+                errors["base"] = "controller_name_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
                     self.hass,
-                    normalized_input[CONF_MAIN_ENTITY],
+                    _controller_name_entity(normalized_input),
                     fallback=subentry.title,
                 )
                 return self.async_update_and_abort(
@@ -577,17 +737,48 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
 
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=_build_controller_schema(
-                _controller_schema_defaults(
-                    user_input,
-                    unique_id=subentry.unique_id or "controller",
-                    title=subentry.title,
-                )
-                or {
+            data_schema=_build_switches_schema(
+                {
                     **dict(subentry.data),
                     CONF_CONTROLLER_ID: subentry.unique_id,
                     "name": subentry.title,
                 }
             ),
             errors=errors,
+        )
+
+    async def async_step_reconfigure_motion_presence(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.SubentryFlowResult:
+        """Collect movement and presence settings while reconfiguring a controller."""
+        subentry = self._get_reconfigure_subentry()
+        if user_input is not None:
+            self._controller_input = {**self._controller_input, **user_input}
+            return await self.async_step_reconfigure_windows_doors()
+
+        return self.async_show_form(
+            step_id="reconfigure_motion_presence",
+            data_schema=_build_motion_presence_schema(
+                self._step_defaults(
+                    unique_id=subentry.unique_id or "controller", title=subentry.title
+                )
+            ),
+        )
+
+    async def async_step_reconfigure_windows_doors(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.SubentryFlowResult:
+        """Collect window and door settings, then update the controller."""
+        if user_input is not None:
+            self._controller_input = {**self._controller_input, **user_input}
+            return await self.async_step_reconfigure(self._controller_input)
+
+        subentry = self._get_reconfigure_subentry()
+        return self.async_show_form(
+            step_id="reconfigure_windows_doors",
+            data_schema=_build_windows_doors_schema(
+                self._step_defaults(
+                    unique_id=subentry.unique_id or "controller", title=subentry.title
+                )
+            ),
         )

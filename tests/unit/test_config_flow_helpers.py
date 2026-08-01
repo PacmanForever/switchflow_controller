@@ -17,10 +17,10 @@ from custom_components.switchflow_controller.config_flow import (
     SwitchManagerConfigFlow,
     SwitchManagerControllerSubentryFlow,
     SwitchManagerOptionsFlow,
-    _controlled_entity_in_use,
-    _main_entity_in_use,
     _build_controller_id,
     _build_controller_schema,
+    _controller_name_entity,
+    _controller_name_entity_in_use,
     _build_global_config_schema,
     _derive_controller_name,
 )
@@ -43,7 +43,7 @@ def test_build_controller_id_adds_suffix_for_duplicates() -> None:
     assert _build_controller_id("", set()) == "controller"
 
 
-def test_main_entity_in_use_detects_other_controller_subentries() -> None:
+def test_controller_name_entity_in_use_detects_other_controller_subentries() -> None:
     entry = SimpleNamespace(
         subentries={
             "sub-1": ConfigSubentry(
@@ -56,51 +56,27 @@ def test_main_entity_in_use_detects_other_controller_subentries() -> None:
         }
     )
 
-    assert _main_entity_in_use(entry, "light.hallway") is True
-    assert _main_entity_in_use(entry, "light.kitchen") is False
-    assert _main_entity_in_use(entry, "light.hallway", ignore_subentry_id="sub-1") is False
-
-
-def test_controlled_entity_in_use_detects_overlapping_outputs() -> None:
-    entry = SimpleNamespace(
-        subentries={
-            "sub-1": ConfigSubentry(
-                data=MappingProxyType(
-                    {
-                        "main_entity": "light.hallway",
-                        "night_entity": "light.hallway_night",
-                        "turn_off_entity_1": "light.kitchen",
-                    }
-                ),
-                subentry_id="sub-1",
-                subentry_type=SUBENTRY_TYPE_CONTROLLER,
-                title="Hallway",
-                unique_id="hallway",
-            )
-        }
-    )
-
+    assert _controller_name_entity_in_use(entry, "light.hallway") is True
+    assert _controller_name_entity_in_use(entry, "light.kitchen") is False
     assert (
-        _controlled_entity_in_use(
-            entry,
-            {"main_entity": "light.office", "night_entity": "light.hallway_night"},
-        )
-        is True
-    )
-    assert (
-        _controlled_entity_in_use(
-            entry,
-            {"main_entity": "light.office", "turn_off_entity_1": "light.hallway_night"},
+        _controller_name_entity_in_use(
+            entry, "light.hallway", ignore_subentry_id="sub-1"
         )
         is False
     )
+
+
+def test_controller_name_entity_uses_night_entity_when_selected() -> None:
+    assert _controller_name_entity({"main_entity": "light.hallway"}) == "light.hallway"
     assert (
-        _controlled_entity_in_use(
-            entry,
-            {"main_entity": "light.hallway", "night_entity": "light.office"},
-            ignore_subentry_id="sub-1",
+        _controller_name_entity(
+            {
+                "main_entity": "light.hallway",
+                "night_entity": "light.hallway_night",
+                "use_night_entity_name": True,
+            }
         )
-        is False
+        == "light.hallway_night"
     )
 
 
@@ -308,7 +284,7 @@ async def test_controller_subentry_reconfigure_updates_title_and_data(hass) -> N
 
 
 @pytest.mark.asyncio
-async def test_controller_subentry_reconfigure_rejects_duplicate_main_entity(hass) -> None:
+async def test_controller_subentry_reconfigure_rejects_duplicate_name_entity(hass) -> None:
     flow = SwitchManagerControllerSubentryFlow()
     flow.hass = hass
     flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
@@ -363,4 +339,4 @@ async def test_controller_subentry_reconfigure_rejects_duplicate_main_entity(has
         )
 
     assert result["type"] is FlowResultType.FORM
-    assert result["errors"] == {"base": "main_entity_already_configured"}
+    assert result["errors"] == {"base": "controller_name_entity_already_configured"}

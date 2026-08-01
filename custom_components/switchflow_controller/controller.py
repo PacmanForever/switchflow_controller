@@ -29,6 +29,8 @@ from .const import (
     CONF_MAIN_ENTITY,
     CONF_NIGHT_ENTITY,
     CONF_NIGHT_MODE_ENTITY,
+    CONF_OPENING_SENSOR_1,
+    CONF_OPENING_SENSOR_2,
     CONF_SMART_MODE_ENTITY,
     CONF_TURN_OFF_ENTITY_1,
     CONF_TURN_OFF_ENTITY_2,
@@ -68,6 +70,9 @@ class ControllerRuntime:
         self.config_entry_id = config_entry_id
         self._timer_lock = asyncio.Lock()
         self._timer_task: asyncio.Task[None] | None = None
+        self._opening_alarm_timer_lock = asyncio.Lock()
+        self._opening_alarm_timer_task: asyncio.Task[None] | None = None
+        self._opening_alarm_owns_main = False
         self._unsubscribers: list[Callable[[], None]] = []
         self._unavailable_entities: set[tuple[str, str]] = set()
         self._startup_warning_grace_deadline: float | None = None
@@ -104,6 +109,7 @@ class ControllerRuntime:
     async def async_stop(self) -> None:
         """Stop runtime handling for this controller."""
         await self._async_cancel_timer()
+        await self._async_cancel_opening_alarm_timer()
         self._clear_all_entity_issues()
         while self._unsubscribers:
             unsubscribe = self._unsubscribers.pop()
@@ -140,6 +146,8 @@ class ControllerRuntime:
                 self.controller.night_entity,
                 self.controller.detector_sensor_1,
                 self.controller.detector_sensor_2,
+                self.controller.opening_sensor_1,
+                self.controller.opening_sensor_2,
             )
             if entity_id is not None
         ]
@@ -156,6 +164,8 @@ class ControllerRuntime:
             return
 
         if new_state.state == STATE_ON:
+            if self._opening_alarm_owns_main:
+                return
             await self._async_turn_off_configured_entities(
                 [self.controller.turn_off_entity_1, self.controller.turn_off_entity_2]
             )
@@ -163,6 +173,8 @@ class ControllerRuntime:
             return
 
         if new_state.state == STATE_OFF:
+            self._opening_alarm_owns_main = False
+            await self._async_cancel_opening_alarm_timer()
             await self._async_cancel_timer()
             if await self._async_is_entity_on(
                 self.controller.night_entity,
@@ -188,6 +200,17 @@ class ControllerRuntime:
             self.controller.detector_sensor_2,
         }:
             await self._async_handle_detector_state_change(new_state)
+            return
+
+        if entity_id in {
+            self.controller.opening_sensor_1,
+            self.controller.opening_sensor_2,
+        }:
+            await self._async_handle_opening_state_change(
+                entity_id,
+                event.data.get("old_state"),
+                new_state,
+            )
             return
 
         if entity_id != self.controller.night_entity:
@@ -253,10 +276,8 @@ class ControllerRuntime:
             return False
         return state.state == STATE_ON
 
-    async def _async_run_alarm_notification_path(self) -> bool:
-        """Run the alarm notification branch if configured and eligible."""
-        if not self.controller.notify_with_alarm:
-            return False
+    async def _async_alarm_is_ready(self) -> bool:
+        """Return whether the configured alarm is armed and not delayed."""
         if self.global_config.alarm_entity is None:
             return False
 
@@ -271,31 +292,66 @@ class ControllerRuntime:
             )
             if timer_state is not None and timer_state.state != STATE_IDLE:
                 return False
+        return True
+
+    async def _async_send_alarm_notification(self, trigger_entity_id: str) -> None:
+        """Send the configured alarm script notification for one triggering entity."""
+        if self.global_config.alarm_notification_script_entity is None:
+            return
+
+        script_state = self._get_state(
+            self.global_config.alarm_notification_script_entity,
+            CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY,
+        )
+        if script_state is None:
+            return
+
+        await self.hass.services.async_call(
+            "script",
+            self.global_config.alarm_notification_script_entity.split(".", 1)[1],
+            {
+                "message": f"SwitchFlow Controller alarm notification from {self.controller.name}",
+                "controller_name": self.controller.name,
+                "trigger_entity_id": trigger_entity_id,
+            },
+            blocking=True,
+        )
+
+    async def _async_run_alarm_notification_path(self) -> bool:
+        """Run the alarm notification branch if configured and eligible."""
+        if not self.controller.notify_with_alarm:
+            return False
+        if not await self._async_alarm_is_ready():
+            return False
 
         await self._async_turn_on_entity(self.controller.main_entity)
-
-        if self.global_config.alarm_notification_script_entity is not None:
-            script_state = self._get_state(
-                self.global_config.alarm_notification_script_entity,
-                CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY,
-            )
-            if script_state is None:
-                return True
-
-            await self.hass.services.async_call(
-                "script",
-                self.global_config.alarm_notification_script_entity.split(".", 1)[1],
-                {
-                    "message": (
-                        f"SwitchFlow Controller alarm notification from {self.controller.name}"
-                    ),
-                    "controller_name": self.controller.name,
-                    "trigger_entity_id": self._first_active_detector(),
-                },
-                blocking=True,
-            )
+        await self._async_send_alarm_notification(self._first_active_detector())
 
         return True
+
+    async def _async_handle_opening_state_change(
+        self,
+        entity_id: str,
+        old_state: State | None,
+        new_state: State,
+    ) -> None:
+        """Notify and briefly light an armed-alarm window or door opening."""
+        if old_state is None or old_state.state != STATE_OFF or new_state.state != STATE_ON:
+            return
+        if not self._is_smart_mode_enabled() or not await self._async_alarm_is_ready():
+            return
+
+        await self._async_send_alarm_notification(entity_id)
+
+        if self._opening_alarm_owns_main:
+            await self._async_restart_opening_alarm_timer()
+            return
+        if await self._async_is_entity_on(self.controller.main_entity, field_name=CONF_MAIN_ENTITY):
+            return
+
+        self._opening_alarm_owns_main = True
+        await self._async_turn_on_entity(self.controller.main_entity)
+        await self._async_restart_opening_alarm_timer()
 
     async def _async_run_detection_activation_path(self) -> bool:
         """Run the normal detection activation path."""
@@ -411,6 +467,47 @@ class ControllerRuntime:
         except asyncio.CancelledError:
             pass
         self._timer_task = None
+
+    async def _async_restart_opening_alarm_timer(self) -> None:
+        """Restart the timer that belongs exclusively to an opening alarm response."""
+        async with self._opening_alarm_timer_lock:
+            await self._async_cancel_opening_alarm_timer_locked()
+            self._opening_alarm_timer_task = self.hass.async_create_task(
+                self._async_opening_alarm_timer_worker()
+            )
+
+    async def _async_cancel_opening_alarm_timer(self) -> None:
+        """Cancel the timer that belongs exclusively to an opening alarm response."""
+        async with self._opening_alarm_timer_lock:
+            await self._async_cancel_opening_alarm_timer_locked()
+
+    async def _async_cancel_opening_alarm_timer_locked(self) -> None:
+        """Cancel the opening alarm timer while holding its lock."""
+        if self._opening_alarm_timer_task is None:
+            return
+
+        self._opening_alarm_timer_task.cancel()
+        try:
+            await self._opening_alarm_timer_task
+        except asyncio.CancelledError:
+            pass
+        self._opening_alarm_timer_task = None
+
+    async def _async_opening_alarm_timer_worker(self) -> None:
+        """Turn off only a main entity previously turned on by an opening alarm."""
+        try:
+            await asyncio.sleep(self.global_config.opening_alarm_light_duration)
+            if not self._opening_alarm_owns_main:
+                return
+
+            self._opening_alarm_owns_main = False
+            self._opening_alarm_timer_task = None
+            await self._async_turn_off_entity(self.controller.main_entity)
+        except asyncio.CancelledError:
+            raise
+        finally:
+            if self._opening_alarm_timer_task is asyncio.current_task():
+                self._opening_alarm_timer_task = None
 
     async def _async_timer_worker(self) -> None:
         """Wait for the controller timeout and then shut down controlled entities."""

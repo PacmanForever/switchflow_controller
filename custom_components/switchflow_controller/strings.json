@@ -10,7 +10,8 @@
           "night_mode_entity": "Binary sensor/helper that enables night mode",
           "alarm_entity": "Alarm entity",
           "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
-          "alarm_notification_script_entity": "Alarm notification script (receives message, controller_name, and trigger_entity_id)"
+          "alarm_notification_script_entity": "Alarm notification script (receives message, controller_name, and trigger_entity_id)",
+          "opening_alarm_light_duration": "Window and door alarm light duration"
         }
       }
     },
@@ -42,7 +43,8 @@
           "night_mode_entity": "Binary sensor/helper that enables night mode",
           "alarm_entity": "Alarm entity",
           "alarm_timer_entity": "Alarm delay timer (no alarm notification while active)",
-          "alarm_notification_script_entity": "Alarm notification script (receives message, controller_name, and trigger_entity_id)"
+          "alarm_notification_script_entity": "Alarm notification script (receives message, controller_name, and trigger_entity_id)",
+          "opening_alarm_light_duration": "Window and door alarm light duration"
         }
       },
       "add_controller": {
@@ -116,8 +118,9 @@
         "reconfigure_successful": "Controller updated"
       },
       "error": {
+        "controller_name_entity_already_configured": "A controller already uses this switch/light as its name.",
         "main_and_night_entity_must_differ": "Main switch/light and night switch/light must be different entities.",
-        "main_entity_already_configured": "A controller with this main switch/light already exists."
+        "night_entity_required_for_name": "Select a night switch/light to use its name."
       },
       "entry_type": "Controller",
       "initiate_flow": {
@@ -131,6 +134,7 @@
             "enabled": "Enabled",
             "main_entity": "Main switch/light",
             "night_entity": "Night switch/light",
+            "use_night_entity_name": "Use the night switch/light name",
             "activate_on_detection": "Turn on when motion/presence is detected",
             "detector_sensor_1": "Motion/Presence detector 1",
             "detector_sensor_2": "Motion/Presence detector 2",
@@ -149,6 +153,7 @@
             "enabled": "Enabled",
             "main_entity": "Main switch/light",
             "night_entity": "Night switch/light",
+            "use_night_entity_name": "Use the night switch/light name",
             "activate_on_detection": "Turn on when motion/presence is detected",
             "detector_sensor_1": "Motion/Presence detector 1",
             "detector_sensor_2": "Motion/Presence detector 2",
@@ -159,6 +164,46 @@
             "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"
+          }
+        },
+        "motion_presence": {
+          "title": "Motion and presence",
+          "data": {
+            "activate_on_detection": "Turn on when motion/presence is detected",
+            "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+            "detector_sensor_1": "Motion/Presence detector 1",
+            "detector_sensor_2": "Motion/Presence detector 2",
+            "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
+            "illuminance_threshold_lux": "Turn on if illuminance is below (lux)",
+            "illuminance_sensor": "Illuminance sensor",
+            "wait_time": "Turn off delay (unless detector clears first)"
+          }
+        },
+        "windows_doors": {
+          "title": "Windows and doors",
+          "data": {
+            "opening_sensor_1": "Window or door sensor 1",
+            "opening_sensor_2": "Window or door sensor 2"
+          }
+        },
+        "reconfigure_motion_presence": {
+          "title": "Motion and presence",
+          "data": {
+            "activate_on_detection": "Turn on when motion/presence is detected",
+            "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+            "detector_sensor_1": "Motion/Presence detector 1",
+            "detector_sensor_2": "Motion/Presence detector 2",
+            "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
+            "illuminance_threshold_lux": "Turn on if illuminance is below (lux)",
+            "illuminance_sensor": "Illuminance sensor",
+            "wait_time": "Turn off delay (unless detector clears first)"
+          }
+        },
+        "reconfigure_windows_doors": {
+          "title": "Windows and doors",
+          "data": {
+            "opening_sensor_1": "Window or door sensor 1",
+            "opening_sensor_2": "Window or door sensor 2"
           }
         }
       }

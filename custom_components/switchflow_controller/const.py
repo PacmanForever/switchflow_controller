@@ -24,13 +24,18 @@ CONF_MAIN_ENTITY: Final = "main_entity"
 CONF_NIGHT_ENTITY: Final = "night_entity"
 CONF_NIGHT_MODE_ENTITY: Final = "night_mode_entity"
 CONF_NOTIFY_WITH_ALARM: Final = "notify_with_alarm"
+CONF_OPENING_ALARM_LIGHT_DURATION: Final = "opening_alarm_light_duration"
+CONF_OPENING_SENSOR_1: Final = "opening_sensor_1"
+CONF_OPENING_SENSOR_2: Final = "opening_sensor_2"
 CONF_SMART_MODE_ENTITY: Final = "smart_mode_entity"
 CONF_TURN_OFF_ENTITY_1: Final = "turn_off_entity_1"
 CONF_TURN_OFF_ENTITY_2: Final = "turn_off_entity_2"
 CONF_TURN_OFF_WHEN_PRESENCE_CLEARS: Final = "turn_off_when_presence_clears"
+CONF_USE_NIGHT_ENTITY_NAME: Final = "use_night_entity_name"
 CONF_WAIT_TIME: Final = "wait_time"
 
 DEFAULT_ILLUMINANCE_THRESHOLD: Final = 10.0
+DEFAULT_OPENING_ALARM_LIGHT_DURATION_SECONDS: Final = 60
 DEFAULT_WAIT_TIME_SECONDS: Final = 3600
 
 STORAGE_KEY: Final = f"{DOMAIN}.controllers"

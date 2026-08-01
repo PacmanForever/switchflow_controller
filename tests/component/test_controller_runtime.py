@@ -13,6 +13,77 @@ from custom_components.switchflow_controller.controller import ControllerRuntime
 from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
 
 
+def test_opening_sensors_are_registered_as_optional_listeners(hass) -> None:
+    """Both configured window and door sensors should receive state-change listeners."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "opening_sensor_1": "binary_sensor.hallway_window",
+            "opening_sensor_2": "binary_sensor.hallway_door",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+
+    assert "binary_sensor.hallway_window" in runtime._configured_listener_entities()
+    assert "binary_sensor.hallway_door" in runtime._configured_listener_entities()
+
+
+@pytest.mark.asyncio
+async def test_opening_sensor_event_dispatches_with_its_state_transition(hass) -> None:
+    """Opening sensor events should route their old and new states to the alarm path."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "opening_sensor_1": "binary_sensor.hallway_window",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_handle_opening_state_change = AsyncMock()
+    old_state = State("binary_sensor.hallway_window", "off")
+    new_state = State("binary_sensor.hallway_window", "on")
+
+    await runtime._async_handle_optional_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "binary_sensor.hallway_window",
+                "old_state": old_state,
+                "new_state": new_state,
+            },
+        )
+    )
+
+    runtime._async_handle_opening_state_change.assert_awaited_once_with(
+        "binary_sensor.hallway_window", old_state, new_state
+    )
+
+
+@pytest.mark.asyncio
+async def test_main_off_clears_opening_alarm_ownership_and_timer(hass) -> None:
+    """Manual main-light shutdown must cancel only the opening alarm timer ownership."""
+    controller = ControllerConfig.from_mapping(
+        {"id": "hallway", "name": "Hallway", "main_entity": "light.hallway", "wait_time": 120}
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._opening_alarm_owns_main = True
+    runtime._async_cancel_opening_alarm_timer = AsyncMock()
+    runtime._async_cancel_timer = AsyncMock()
+
+    await runtime._async_handle_main_entity_event(
+        Event("state_changed", {"new_state": State("light.hallway", "off")})
+    )
+
+    assert runtime._opening_alarm_owns_main is False
+    runtime._async_cancel_opening_alarm_timer.assert_awaited_once()
+    runtime._async_cancel_timer.assert_awaited_once()
+
+
 @pytest.mark.asyncio
 async def test_detector_clear_turns_off_entities_early(hass) -> None:
     """Configured detectors should turn off entities early when all are clear."""

@@ -10,4 +10,4 @@ mkdir -p "$CONFIG_DIR/custom_components"
 rm -rf "$TARGET_COMPONENT_DIR"
 cp -R "$SOURCE_COMPONENT_DIR" "$TARGET_COMPONENT_DIR"
 
-exec "$ROOT_DIR/.venv/bin/hass" -c "$CONFIG_DIR"
+exec "$ROOT_DIR/.venv/bin/python" -m homeassistant -c "$CONFIG_DIR"

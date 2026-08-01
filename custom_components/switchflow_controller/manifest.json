@@ -4,10 +4,10 @@
   "codeowners": ["@PacmanForever"],
   "config_flow": true,
   "documentation": "https://github.com/PacmanForever/switchflow_controller",
-  "integration_type": "service",
+  "integration_type": "hardware",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/PacmanForever/switchflow_controller/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "0.3.9"
+  "version": "0.4.0"
 }

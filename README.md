@@ -21,11 +21,13 @@ A community Home Assistant custom integration for managing reusable motion-drive
 
 - Shared global configuration for house-wide helpers and alarm-related references
 - Multiple independent controllers for lights or switches
+- Guided three-step controller setup for switches/lights, motion and presence, and windows and doors
 - Motion/presence-based activation with optional night-mode behavior
-- Optional illuminance threshold gating
-- Delayed shutoff with motion-clear waiting
+- Optional numeric illuminance threshold gating in lux
+- Delayed shutoff with motion-clear waiting, defaulting to one hour
 - Optional per-controller alarm notification behavior
-- Global script-based alarm notification action
+- Armed window and door opening notifications with an optional temporary main-light response
+- Global script-based alarm notification action with the opening-alarm light duration
 - Conservative Home Assistant integration design focused on long-term maintainability
 
 ## Languages
@@ -71,6 +73,7 @@ Initial global fields:
 - `alarm_entity`
 - `alarm_timer_entity`
 - `alarm_notification_script_entity`
+- `opening_alarm_light_duration` (defaults to 1 minute)
 
 These values are configured through the integration setup or options flow.
 
@@ -88,13 +91,23 @@ Each controller can define:
 
 - a main entity
 - an optional night entity
+- whether the controller name is derived from the night entity instead of the main entity
 - up to two motion/presence detectors
+- up to two window or door opening sensors
 - an optional illuminance sensor
-- an optional illuminance threshold entity
-- a wait time before shutoff
-- whether motion activation is enabled
+- an optional numeric illuminance threshold in lux
+- a wait time before shutoff (defaults to 1 hour)
+- whether motion activation and detector-clear shutdown are enabled
 - whether alarm notifications are enabled for that controller
 - up to two additional entities to turn off when the main entity turns on
+
+The controller form is split into three steps:
+
+1. **Switches and lights**: the main and optional night entity, controller-name source, and linked turn-off entities.
+2. **Motion and presence**: detectors, activation and shutoff behavior, illuminance settings, alarm-notification preference, and delayed shutoff.
+3. **Windows and doors**: the two optional opening sensors used by the armed-alarm response.
+
+Controller names must be unique for the selected name source. This means a main or night entity can be reused by another controller unless both controllers use that same entity as their name source.
 
 ### Why There Is No Global Hub
 
@@ -131,9 +144,9 @@ If the night entity is manually turned on, the controller still keeps the normal
 
 ### Illuminance
 
-If an illuminance sensor is configured, activation can be gated by an illuminance threshold.
+If an illuminance sensor and a numeric threshold are configured, activation is allowed only while the measured illuminance is at or below that threshold in lux.
 
-If no threshold entity is configured, the integration may use a simple built-in default threshold.
+Leaving the threshold empty does not apply illuminance gating. Existing stored threshold-entity values remain readable for compatibility with earlier releases.
 
 ### Delayed Shutoff
 
@@ -142,6 +155,14 @@ After activation, the controller waits for the configured delay and then waits u
 The shutoff model is intentionally restart-like so stale pending timers are cancelled when new triggers arrive.
 
 If `turn_off_when_presence_clears` is enabled, the controller may turn off early as soon as all configured detectors are clear, regardless of whether they are motion or presence sensors.
+
+### Windows and Doors
+
+Opening sensors are evaluated only while Smart Mode is enabled and the configured alarm is armed. Every `off` to `on` opening transition sends the configured alarm notification script, regardless of the controller's motion-notification preference.
+
+When the controller's main entity is off, an eligible opening turns it on for the shared `opening_alarm_light_duration`. The default duration is 1 minute. If the main entity is already on from manual use or motion handling, the opening sends a notification but does not change its timer. If a previous opening response owns the light, a new opening restarts only that opening-response timer.
+
+When the opening-response timer finishes, it turns off the main entity only when that response originally turned it on. It does not interfere with the normal motion/presence shutdown timer.
 
 ## Alarm Notifications
 
@@ -199,6 +220,17 @@ max_exceeded: silent
 - `detector_sensor_2`: upstairs staircase motion sensor
 - `wait_time`: 3 minutes
 - `notify_with_alarm`: enabled
+
+### Armed Front Door Response
+
+- `main_entity`: entrance light
+- `opening_sensor_1`: front door contact
+- `opening_sensor_2`: patio door contact
+- `opening_alarm_light_duration`: 1 minute (global setting)
+- `alarm_entity`: armed alarm panel (global setting)
+- `alarm_notification_script_entity`: notification script (global setting)
+
+An opening while the alarm is armed sends a notification. If the entrance light is off, the integration turns it on for one minute and then turns it back off unless the light was already being managed by a previous opening response.
 
 ## Manual Migration From Blueprint
 
