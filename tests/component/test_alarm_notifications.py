@@ -60,7 +60,7 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
     assert script_calls
     assert (
         script_calls[0]["message"]
-        == "SwitchFlow Controller alarm notification from Hallway"
+        == "SwitchFlow Controller alarm: motion detected in Hallway"
     )
     assert script_calls[0]["controller_name"] == "Hallway"
     assert script_calls[0]["trigger_entity_id"] == "binary_sensor.hallway_motion"
@@ -181,7 +181,7 @@ async def test_opening_alarm_notifies_and_owns_an_off_main_light(hass) -> None:
     assert runtime._opening_alarm_owns_main is True
     assert (
         script_calls[0]["message"]
-        == "SwitchFlow Controller alarm notification from Hallway"
+        == "SwitchFlow Controller alarm: window or door opened in Hallway"
     )
     assert script_calls[0]["trigger_entity_id"] == "binary_sensor.hallway_window"
 

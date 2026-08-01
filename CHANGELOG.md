@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- Made alarm notification messages identify their source: motion or presence events report `motion detected`, while window and door events report `window or door opened`.
+- Kept the existing `controller_name` and `trigger_entity_id` script fields unchanged for compatibility.
+- Documented the alarm notification payload and added regression coverage for both event messages.
+
 ## 0.4.2
 
 - Fixed alarm-driven motion activation so a main light it turns on is switched off after the shared `opening_alarm_light_duration`, matching the armed window and door response. Normal motion activation continues to use the controller-specific `wait_time`.

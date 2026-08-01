@@ -188,7 +188,7 @@ If no notification script is configured, the controller skips notification safel
 
 The script is called through the `script` domain and currently receives these fields:
 
-- `message`
+- `message`: `SwitchFlow Controller alarm: motion detected in <controller>` or `SwitchFlow Controller alarm: window or door opened in <controller>`
 - `controller_name`
 - `trigger_entity_id`
 

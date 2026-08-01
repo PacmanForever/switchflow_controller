@@ -305,7 +305,9 @@ class ControllerRuntime:
                 return False
         return True
 
-    async def _async_send_alarm_notification(self, trigger_entity_id: str) -> None:
+    async def _async_send_alarm_notification(
+        self, trigger_entity_id: str | None, event_description: str
+    ) -> None:
         """Send the configured alarm script notification for one triggering entity."""
         if self.global_config.alarm_notification_script_entity is None:
             return
@@ -321,7 +323,10 @@ class ControllerRuntime:
             "script",
             self.global_config.alarm_notification_script_entity.split(".", 1)[1],
             {
-                "message": f"SwitchFlow Controller alarm notification from {self.controller.name}",
+                "message": (
+                    f"SwitchFlow Controller alarm: {event_description} "
+                    f"in {self.controller.name}"
+                ),
                 "controller_name": self.controller.name,
                 "trigger_entity_id": trigger_entity_id,
             },
@@ -336,7 +341,9 @@ class ControllerRuntime:
             return False
 
         await self._async_turn_on_entity(self.controller.main_entity)
-        await self._async_send_alarm_notification(self._first_active_detector())
+        await self._async_send_alarm_notification(
+            self._first_active_detector(), "motion detected"
+        )
 
         return True
 
@@ -352,7 +359,7 @@ class ControllerRuntime:
         if not self._is_smart_mode_enabled() or not await self._async_alarm_is_ready():
             return
 
-        await self._async_send_alarm_notification(entity_id)
+        await self._async_send_alarm_notification(entity_id, "window or door opened")
 
         if self._opening_alarm_owns_main:
             await self._async_restart_opening_alarm_timer()
