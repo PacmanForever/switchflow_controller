@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from homeassistant.core import State
+from homeassistant.helpers import area_registry as ar, entity_registry as er
 
 from custom_components.switchflow_controller.controller import ControllerRuntime
 from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
@@ -46,6 +47,14 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
     hass.services.async_register("light", "turn_on", handle_light_turn_on)
     hass.services.async_register("script", "notify_alarm", handle_script)
 
+    area = ar.async_get(hass).async_create("Attic")
+    er.async_get(hass).async_get_or_create(
+        "light",
+        "test",
+        "hallway",
+        suggested_object_id="hallway",
+    )
+    er.async_get(hass).async_update_entity("light.hallway", area_id=area.id)
     hass.states.async_set("light.hallway", "off")
     hass.states.async_set("binary_sensor.hallway_motion", "on")
     hass.states.async_set("alarm_control_panel.house", "armed_away")
@@ -60,7 +69,7 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
     assert script_calls
     assert (
         script_calls[0]["message"]
-        == "SwitchFlow Controller alarm: motion detected in Hallway"
+        == "SwitchFlow Controller alarm: Motion or presence detected in Attic"
     )
     assert script_calls[0]["controller_name"] == "Hallway"
     assert script_calls[0]["trigger_entity_id"] == "binary_sensor.hallway_motion"
@@ -181,7 +190,7 @@ async def test_opening_alarm_notifies_and_owns_an_off_main_light(hass) -> None:
     assert runtime._opening_alarm_owns_main is True
     assert (
         script_calls[0]["message"]
-        == "SwitchFlow Controller alarm: window or door opened in Hallway"
+        == "SwitchFlow Controller alarm: Window or door opened in Hallway"
     )
     assert script_calls[0]["trigger_entity_id"] == "binary_sensor.hallway_window"
 

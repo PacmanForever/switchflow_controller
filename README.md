@@ -188,7 +188,7 @@ If no notification script is configured, the controller skips notification safel
 
 The script is called through the `script` domain and currently receives these fields:
 
-- `message`: `SwitchFlow Controller alarm: motion detected in <controller>` or `SwitchFlow Controller alarm: window or door opened in <controller>`
+- `message`: `SwitchFlow Controller alarm: Motion or presence detected in <area>` or `SwitchFlow Controller alarm: Window or door opened in <area>`. The area is read from the configured main switch/light; if it has no Home Assistant area, the controller name is used instead.
 - `controller_name`
 - `trigger_entity_id`
 

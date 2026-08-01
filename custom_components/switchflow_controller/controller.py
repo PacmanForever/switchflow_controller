@@ -15,6 +15,11 @@ from homeassistant.const import (
     STATE_UNKNOWN,
 )
 from homeassistant.core import CoreState, Event, HomeAssistant, State, callback
+from homeassistant.helpers import (
+    area_registry as ar,
+    device_registry as dr,
+    entity_registry as er,
+)
 from homeassistant.helpers.event import EventStateChangedData, async_track_state_change_event
 
 from .const import (
@@ -325,13 +330,26 @@ class ControllerRuntime:
             {
                 "message": (
                     f"SwitchFlow Controller alarm: {event_description} "
-                    f"in {self.controller.name}"
+                    f"in {self._controller_area_name()}"
                 ),
                 "controller_name": self.controller.name,
                 "trigger_entity_id": trigger_entity_id,
             },
             blocking=True,
         )
+
+    def _controller_area_name(self) -> str:
+        """Return the main entity's Home Assistant area name when available."""
+        entity_entry = er.async_get(self.hass).async_get(self.controller.main_entity)
+        area_id = entity_entry.area_id if entity_entry is not None else None
+        if area_id is None and entity_entry is not None and entity_entry.device_id:
+            device_entry = dr.async_get(self.hass).async_get(entity_entry.device_id)
+            area_id = device_entry.area_id if device_entry is not None else None
+        if area_id is not None:
+            area = ar.async_get(self.hass).async_get_area(area_id)
+            if area is not None:
+                return area.name
+        return self.controller.name
 
     async def _async_run_alarm_notification_path(self) -> bool:
         """Run the alarm notification branch if configured and eligible."""
@@ -342,7 +360,7 @@ class ControllerRuntime:
 
         await self._async_turn_on_entity(self.controller.main_entity)
         await self._async_send_alarm_notification(
-            self._first_active_detector(), "motion detected"
+            self._first_active_detector(), "Motion or presence detected"
         )
 
         return True
@@ -359,7 +377,7 @@ class ControllerRuntime:
         if not self._is_smart_mode_enabled() or not await self._async_alarm_is_ready():
             return
 
-        await self._async_send_alarm_notification(entity_id, "window or door opened")
+        await self._async_send_alarm_notification(entity_id, "Window or door opened")
 
         if self._opening_alarm_owns_main:
             await self._async_restart_opening_alarm_timer()

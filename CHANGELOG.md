@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4
+
+- Updated alarm messages to use the Home Assistant area of the configured main switch/light, including areas inherited through the light's device. The controller name remains the fallback when no area is configured.
+- Refined the visible event messages to `Motion or presence detected` and `Window or door opened`.
+- Updated the alarm notification documentation and regression coverage.
+
 ## 0.4.3
 
 - Made alarm notification messages identify their source: motion or presence events report `motion detected`, while window and door events report `window or door opened`.
