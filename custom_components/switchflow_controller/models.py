@@ -17,6 +17,7 @@ from .const import (
     CONF_DETECTOR_SENSOR_2,
     CONF_ENABLED,
     CONF_ILLUMINANCE_SENSOR,
+    CONF_ILLUMINANCE_THRESHOLD_LUX,
     CONF_ILLUMINANCE_THRESHOLD_ENTITY,
     CONF_MAIN_ENTITY,
     CONF_NIGHT_ENTITY,
@@ -77,6 +78,20 @@ def _normalize_wait_time(value: Any) -> int:
     return wait_time
 
 
+def _normalize_optional_float(value: Any) -> float | None:
+    """Normalize optional numeric values."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        cleaned = value.strip()
+        if not cleaned:
+            return None
+        return float(cleaned)
+    if isinstance(value, int | float):
+        return float(value)
+    raise ValueError(f"Expected numeric value, got {type(value)!r}")
+
+
 @dataclass(slots=True)
 class GlobalConfig:
     """Shared global configuration for the integration."""
@@ -132,9 +147,10 @@ class ControllerConfig:
     detector_sensor_1: str | None = None
     detector_sensor_2: str | None = None
     illuminance_sensor: str | None = None
+    illuminance_threshold_lux: float | None = None
     illuminance_threshold_entity: str | None = None
     turn_off_when_presence_clears: bool = False
-    activate_on_detection: bool = True
+    activate_on_detection: bool = False
     notify_with_alarm: bool = False
     turn_off_entity_1: str | None = None
     turn_off_entity_2: str | None = None
@@ -164,6 +180,9 @@ class ControllerConfig:
             detector_sensor_1=_normalize_entity_id(data.get(CONF_DETECTOR_SENSOR_1)),
             detector_sensor_2=_normalize_entity_id(data.get(CONF_DETECTOR_SENSOR_2)),
             illuminance_sensor=_normalize_entity_id(data.get(CONF_ILLUMINANCE_SENSOR)),
+            illuminance_threshold_lux=_normalize_optional_float(
+                data.get(CONF_ILLUMINANCE_THRESHOLD_LUX)
+            ),
             illuminance_threshold_entity=_normalize_entity_id(
                 data.get(CONF_ILLUMINANCE_THRESHOLD_ENTITY)
             ),
@@ -171,7 +190,7 @@ class ControllerConfig:
                 data.get(CONF_TURN_OFF_WHEN_PRESENCE_CLEARS), default=False
             ),
             activate_on_detection=_normalize_bool(
-                data.get(CONF_ACTIVATE_ON_DETECTION), default=True
+                data.get(CONF_ACTIVATE_ON_DETECTION), default=False
             ),
             notify_with_alarm=_normalize_bool(
                 data.get(CONF_NOTIFY_WITH_ALARM), default=False
@@ -192,6 +211,7 @@ class ControllerConfig:
             CONF_DETECTOR_SENSOR_1: self.detector_sensor_1,
             CONF_DETECTOR_SENSOR_2: self.detector_sensor_2,
             CONF_ILLUMINANCE_SENSOR: self.illuminance_sensor,
+            CONF_ILLUMINANCE_THRESHOLD_LUX: self.illuminance_threshold_lux,
             CONF_ILLUMINANCE_THRESHOLD_ENTITY: self.illuminance_threshold_entity,
             CONF_WAIT_TIME: self.wait_time,
             CONF_TURN_OFF_WHEN_PRESENCE_CLEARS: self.turn_off_when_presence_clears,

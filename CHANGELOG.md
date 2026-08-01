@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.9
+
+- Switched the illuminance threshold from an entity-based selector to a numeric lux value while keeping legacy values compatible.
+- Updated the controller defaults so activation and shutdown behavior are less aggressive by default, and set the default shutoff delay to one hour.
+- Refined the activation, reset, and alarm-notification labels in the config flow and translations for clearer Home Assistant UI wording.
+- Reordered the alarm-notification option beneath the second detector field for a more consistent form layout.
+
 ## 0.3.8
 
 - Aligned the README controller examples and detector wording with the real config keys and current motion/presence behavior.

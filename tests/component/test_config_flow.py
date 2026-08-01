@@ -79,6 +79,7 @@ async def test_controller_subentry_flow_adds_controller(hass) -> None:
         result = await flow.async_step_user(
         {
             "main_entity": "light.hallway",
+            "illuminance_threshold_lux": 25,
             "wait_time": 120,
             "enabled": True,
             "activate_on_detection": True,
@@ -91,6 +92,7 @@ async def test_controller_subentry_flow_adds_controller(hass) -> None:
     assert result["unique_id"] == "hallway"
     assert result["title"] == "Hallway"
     assert result["data"]["main_entity"] == "light.hallway"
+    assert result["data"]["illuminance_threshold_lux"] == 25.0
 
 
 @pytest.mark.asyncio

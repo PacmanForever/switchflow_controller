@@ -17,7 +17,7 @@ async def test_high_illuminance_blocks_detection_activation(hass) -> None:
             "name": "Hallway",
             "main_entity": "light.hallway",
             "illuminance_sensor": "sensor.hallway_lux",
-            "illuminance_threshold_entity": "input_number.hallway_threshold",
+            "illuminance_threshold_lux": 10,
             "wait_time": 60,
         }
     )
@@ -29,7 +29,6 @@ async def test_high_illuminance_blocks_detection_activation(hass) -> None:
     hass.services.async_register("light", "turn_on", handle_light_turn_on)
     hass.states.async_set("light.hallway", "off")
     hass.states.async_set("sensor.hallway_lux", "50")
-    hass.states.async_set("input_number.hallway_threshold", "10")
 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     activated = await runtime._async_run_detection_activation_path()

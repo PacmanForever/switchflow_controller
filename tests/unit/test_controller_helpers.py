@@ -567,7 +567,7 @@ async def test_entity_helpers_cover_service_calls_and_detector_state_checks(hass
         detector_sensor_1="binary_sensor.motion1",
         detector_sensor_2="binary_sensor.motion2",
         illuminance_sensor="sensor.lux",
-        illuminance_threshold_entity="input_number.threshold",
+        illuminance_threshold_lux=10,
         turn_off_entity_1="switch.a",
         turn_off_entity_2="switch.b",
     )

@@ -24,6 +24,7 @@ from .const import (
     CONF_DETECTOR_SENSOR_1,
     CONF_DETECTOR_SENSOR_2,
     CONF_ILLUMINANCE_SENSOR,
+    CONF_ILLUMINANCE_THRESHOLD_LUX,
     CONF_ILLUMINANCE_THRESHOLD_ENTITY,
     CONF_MAIN_ENTITY,
     CONF_NIGHT_ENTITY,
@@ -370,8 +371,14 @@ class ControllerRuntime:
         if lux_value is None:
             return None
 
-        threshold = DEFAULT_ILLUMINANCE_THRESHOLD
-        if self.controller.illuminance_threshold_entity is not None:
+        threshold = self.controller.illuminance_threshold_lux
+        if threshold is None:
+            threshold = DEFAULT_ILLUMINANCE_THRESHOLD
+
+        if (
+            self.controller.illuminance_threshold_lux is None
+            and self.controller.illuminance_threshold_entity is not None
+        ):
             threshold_state = self._get_state(
                 self.controller.illuminance_threshold_entity,
                 CONF_ILLUMINANCE_THRESHOLD_ENTITY,
@@ -593,13 +600,16 @@ class ControllerRuntime:
             (CONF_DETECTOR_SENSOR_1, self.controller.detector_sensor_1),
             (CONF_DETECTOR_SENSOR_2, self.controller.detector_sensor_2),
             (CONF_ILLUMINANCE_SENSOR, self.controller.illuminance_sensor),
-            (
-                CONF_ILLUMINANCE_THRESHOLD_ENTITY,
-                self.controller.illuminance_threshold_entity,
-            ),
             (CONF_TURN_OFF_ENTITY_1, self.controller.turn_off_entity_1),
             (CONF_TURN_OFF_ENTITY_2, self.controller.turn_off_entity_2),
         ]
+        if self.controller.illuminance_threshold_entity is not None:
+            entity_checks.append(
+                (
+                    CONF_ILLUMINANCE_THRESHOLD_ENTITY,
+                    self.controller.illuminance_threshold_entity,
+                )
+            )
         return [
             (field_name, entity_id)
             for field_name, entity_id in entity_checks

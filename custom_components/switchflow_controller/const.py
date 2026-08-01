@@ -18,6 +18,7 @@ CONF_DETECTOR_SENSOR_1: Final = "detector_sensor_1"
 CONF_DETECTOR_SENSOR_2: Final = "detector_sensor_2"
 CONF_ENABLED: Final = "enabled"
 CONF_ILLUMINANCE_SENSOR: Final = "illuminance_sensor"
+CONF_ILLUMINANCE_THRESHOLD_LUX: Final = "illuminance_threshold_lux"
 CONF_ILLUMINANCE_THRESHOLD_ENTITY: Final = "illuminance_threshold_entity"
 CONF_MAIN_ENTITY: Final = "main_entity"
 CONF_NIGHT_ENTITY: Final = "night_entity"
@@ -30,7 +31,7 @@ CONF_TURN_OFF_WHEN_PRESENCE_CLEARS: Final = "turn_off_when_presence_clears"
 CONF_WAIT_TIME: Final = "wait_time"
 
 DEFAULT_ILLUMINANCE_THRESHOLD: Final = 10.0
-DEFAULT_WAIT_TIME_SECONDS: Final = 120
+DEFAULT_WAIT_TIME_SECONDS: Final = 3600
 
 STORAGE_KEY: Final = f"{DOMAIN}.controllers"
 LEGACY_STORAGE_KEY: Final = f"{LEGACY_DOMAIN}.controllers"

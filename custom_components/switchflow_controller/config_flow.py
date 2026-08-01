@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -21,6 +19,7 @@ from .const import (
     CONF_DETECTOR_SENSOR_2,
     CONF_ENABLED,
     CONF_ILLUMINANCE_SENSOR,
+    CONF_ILLUMINANCE_THRESHOLD_LUX,
     CONF_ILLUMINANCE_THRESHOLD_ENTITY,
     CONF_MAIN_ENTITY,
     CONF_NIGHT_ENTITY,
@@ -31,6 +30,7 @@ from .const import (
     CONF_TURN_OFF_ENTITY_2,
     CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
     CONF_WAIT_TIME,
+    DEFAULT_WAIT_TIME_SECONDS,
     DOMAIN,
     SUBENTRY_TYPE_CONTROLLER,
     TITLE,
@@ -44,7 +44,6 @@ OPTIONAL_CONTROLLER_ENTITY_FIELDS = (
     CONF_NIGHT_ENTITY,
     CONF_DETECTOR_SENSOR_1,
     CONF_DETECTOR_SENSOR_2,
-    CONF_ILLUMINANCE_THRESHOLD_ENTITY,
     CONF_ILLUMINANCE_SENSOR,
     CONF_TURN_OFF_ENTITY_1,
     CONF_TURN_OFF_ENTITY_2,
@@ -76,6 +75,20 @@ def _normalize_optional_entity_selector(value: Any) -> str | None:
     return cleaned or None
 
 
+def _normalize_optional_number(value: Any) -> float | None:
+    """Normalize optional numeric values coming from forms."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        cleaned = value.strip()
+        if not cleaned:
+            return None
+        return float(cleaned)
+    if isinstance(value, int | float):
+        return float(value)
+    raise vol.Invalid(f"Expected numeric value, got {type(value)!r}")
+
+
 def _normalize_controller_input(user_input: dict[str, Any]) -> dict[str, Any]:
     """Convert controller form payloads into storage-friendly values."""
     wait_time_value = user_input[CONF_WAIT_TIME]
@@ -94,8 +107,11 @@ def _normalize_controller_input(user_input: dict[str, Any]) -> dict[str, Any]:
         field: _normalize_optional_entity_selector(user_input.get(field))
         for field in OPTIONAL_CONTROLLER_ENTITY_FIELDS
     }
+    illuminance_threshold_lux = _normalize_optional_number(
+        user_input.get(CONF_ILLUMINANCE_THRESHOLD_LUX)
+    )
 
-    return {
+    normalized_input = {
         **user_input,
         **{
             field: value
@@ -104,6 +120,12 @@ def _normalize_controller_input(user_input: dict[str, Any]) -> dict[str, Any]:
         },
         CONF_WAIT_TIME: wait_time_seconds,
     }
+    if illuminance_threshold_lux is None:
+        normalized_input.pop(CONF_ILLUMINANCE_THRESHOLD_LUX, None)
+    else:
+        normalized_input[CONF_ILLUMINANCE_THRESHOLD_LUX] = illuminance_threshold_lux
+
+    return normalized_input
 
 
 def _entry_global_defaults(config_entry: config_entries.ConfigEntry) -> dict[str, Any]:
@@ -221,8 +243,12 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
     sensor_selector = selector.EntitySelector(
         selector.EntitySelectorConfig(domain="sensor", multiple=False)
     )
-    illuminance_threshold_selector = selector.EntitySelector(
-        selector.EntitySelectorConfig(domain="input_number", multiple=False)
+    illuminance_threshold_selector = selector.NumberSelector(
+        selector.NumberSelectorConfig(
+            min=0,
+            step=1,
+            unit_of_measurement="lx",
+        )
     )
 
     return vol.Schema(
@@ -242,7 +268,7 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
             ): main_entity_selector,
             vol.Required(
                 CONF_ACTIVATE_ON_DETECTION,
-                default=values.activate_on_detection if values else True,
+                default=values.activate_on_detection if values else False,
             ): selector.BooleanSelector(),
             vol.Required(
                 CONF_TURN_OFF_WHEN_PRESENCE_CLEARS,
@@ -258,10 +284,14 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
                 detector_selector,
                 values.detector_sensor_2 if values else None,
             ): detector_selector,
+            vol.Required(
+                CONF_NOTIFY_WITH_ALARM,
+                default=values.notify_with_alarm if values else False,
+            ): selector.BooleanSelector(),
             _optional_selector_field(
-                CONF_ILLUMINANCE_THRESHOLD_ENTITY,
+                CONF_ILLUMINANCE_THRESHOLD_LUX,
                 illuminance_threshold_selector,
-                values.illuminance_threshold_entity if values else None,
+                values.illuminance_threshold_lux if values else None,
             ): illuminance_threshold_selector,
             _optional_selector_field(
                 CONF_ILLUMINANCE_SENSOR,
@@ -271,7 +301,7 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
             vol.Required(
                 CONF_WAIT_TIME,
                 default=_wait_time_selector_default(
-                    values.wait_time if values else 120
+                    values.wait_time if values else DEFAULT_WAIT_TIME_SECONDS
                 ),
             ): selector.DurationSelector(
                 selector.DurationSelectorConfig(
@@ -279,10 +309,6 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
                     allow_negative=False,
                 )
             ),
-            vol.Required(
-                CONF_NOTIFY_WITH_ALARM,
-                default=values.notify_with_alarm if values else False,
-            ): selector.BooleanSelector(),
             _optional_selector_field(
                 CONF_TURN_OFF_ENTITY_1,
                 main_entity_selector,

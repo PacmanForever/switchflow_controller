@@ -51,14 +51,14 @@
           "enabled": "Enabled",
           "main_entity": "Main switch/light",
           "night_entity": "Night switch/light",
-          "activate_on_detection": "Turn on when motion/presence is detected",
+          "activate_on_detection": "Turn on when one of the motion or presence detectors activates",
           "detector_sensor_1": "Motion/Presence detector 1",
           "detector_sensor_2": "Motion/Presence detector 2",
-          "illuminance_threshold_entity": "Turn on if the illuminance selector value is below",
+          "illuminance_threshold_lux": "Turn on if illuminance is below (lux)",
           "illuminance_sensor": "Illuminance sensor",
-          "turn_off_when_presence_clears": "Turn off when the detector resets (may turn off before delay)",
+          "turn_off_when_presence_clears": "Turn off when the detectors reset (may turn off before delay)",
           "wait_time": "Turn off delay (unless detector clears first)",
-          "notify_with_alarm": "Notify when turn on and alarm is actived",
+          "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
           "turn_off_entity_1": "When the main switch/light turns on, turn off switch/light 1",
           "turn_off_entity_2": "On turn on, turn off the switch/light 2"
         }
@@ -87,11 +87,11 @@
           "activate_on_detection": "Turn on when motion/presence is detected",
           "detector_sensor_1": "Motion/Presence detector 1",
           "detector_sensor_2": "Motion/Presence detector 2",
-          "illuminance_threshold_entity": "Turn on if the illuminance selector value is below",
+          "illuminance_threshold_lux": "Turn on if illuminance is below (lux)",
           "illuminance_sensor": "Illuminance sensor",
           "wait_time": "Turn off delay (unless detector clears first)",
           "turn_off_when_presence_clears": "Turn off when the detector resets (may turn off before delay)",
-          "notify_with_alarm": "Notify when turn on and alarm is actived",
+          "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
           "turn_off_entity_1": "When the main switch/light turns on, turn off switch/light 1",
           "turn_off_entity_2": "When the main switch/light turns on, turn off switch/light 2"
         }
@@ -134,11 +134,11 @@
             "activate_on_detection": "Turn on when motion/presence is detected",
             "detector_sensor_1": "Motion/Presence detector 1",
             "detector_sensor_2": "Motion/Presence detector 2",
-            "illuminance_threshold_entity": "Turn on if illuminance is below",
+            "illuminance_threshold_lux": "Turn on if illuminance is below (lux)",
             "illuminance_sensor": "Illuminance sensor",
             "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
             "wait_time": "Turn off delay (unless detector clears first)",
-            "notify_with_alarm": "Notify when turn on and alarm is actived",
+            "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"
           }
@@ -152,11 +152,11 @@
             "activate_on_detection": "Turn on when motion/presence is detected",
             "detector_sensor_1": "Motion/Presence detector 1",
             "detector_sensor_2": "Motion/Presence detector 2",
-            "illuminance_threshold_entity": "Turn on if illuminance is below",
+            "illuminance_threshold_lux": "Turn on if illuminance is below (lux)",
             "illuminance_sensor": "Illuminance sensor",
             "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
             "wait_time": "Turn off delay (unless detector clears first)",
-            "notify_with_alarm": "Notify when turn on and alarm is actived",
+            "notify_with_alarm": "Notify when a motion or presence detector activates and the alarm is armed",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"
           }

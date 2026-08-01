@@ -6,7 +6,12 @@ from datetime import timedelta
 
 import pytest
 
-from custom_components.switchflow_controller.const import CONF_MAIN_ENTITY, CONF_WAIT_TIME
+from custom_components.switchflow_controller.const import (
+    CONF_ILLUMINANCE_THRESHOLD_ENTITY,
+    CONF_ILLUMINANCE_THRESHOLD_LUX,
+    CONF_MAIN_ENTITY,
+    CONF_WAIT_TIME,
+)
 from custom_components.switchflow_controller.models import (
     ControllerConfig,
     GlobalConfig,
@@ -42,13 +47,15 @@ def test_controller_config_normalizes_payload() -> None:
             "id": "hallway",
             "name": "Hallway",
             CONF_MAIN_ENTITY: "light.hallway",
+            CONF_ILLUMINANCE_THRESHOLD_LUX: "12.5",
             CONF_WAIT_TIME: 120,
         }
     )
 
     assert controller.main_entity == "light.hallway"
+    assert controller.illuminance_threshold_lux == 12.5
     assert controller.wait_time == 120
-    assert controller.activate_on_detection is True
+    assert controller.activate_on_detection is False
 
 
 def test_normalizers_cover_invalid_and_empty_values() -> None:
@@ -70,6 +77,22 @@ def test_normalizers_cover_invalid_and_empty_values() -> None:
     assert _normalize_wait_time({"hours": 1, "minutes": 2, "seconds": 3}) == 3723
     with pytest.raises(ValueError, match="positive integer"):
         _normalize_wait_time(0)
+
+
+def test_controller_config_keeps_legacy_illuminance_threshold_entity() -> None:
+    """Legacy entity-based illuminance thresholds should remain readable."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            CONF_MAIN_ENTITY: "light.hallway",
+            CONF_ILLUMINANCE_THRESHOLD_ENTITY: "input_number.hallway_threshold",
+            CONF_WAIT_TIME: 120,
+        }
+    )
+
+    assert controller.illuminance_threshold_lux is None
+    assert controller.illuminance_threshold_entity == "input_number.hallway_threshold"
 
 
 def test_global_config_and_controller_validations_cover_required_fields() -> None:
@@ -133,4 +156,4 @@ def test_default_controller_payload_uses_default_wait_time() -> None:
     assert payload["id"] == "hallway"
     assert payload["name"] == "Hallway"
     assert payload["main_entity"] == "light.hallway"
-    assert payload["wait_time"] == 120
+    assert payload["wait_time"] == 3600
