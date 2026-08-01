@@ -181,6 +181,7 @@
         },
         "windows_doors": {
           "title": "Windows and doors",
+          "description": "When one of these opening sensors activates, SwitchFlow sends an alarm notification and turns on the main switch/light if the alarm is armed.",
           "data": {
             "opening_sensor_1": "Window or door sensor 1",
             "opening_sensor_2": "Window or door sensor 2"
@@ -201,6 +202,7 @@
         },
         "reconfigure_windows_doors": {
           "title": "Windows and doors",
+          "description": "When one of these opening sensors activates, SwitchFlow sends an alarm notification and turns on the main switch/light if the alarm is armed.",
           "data": {
             "opening_sensor_1": "Window or door sensor 1",
             "opening_sensor_2": "Window or door sensor 2"

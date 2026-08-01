@@ -19,6 +19,7 @@ from custom_components.switchflow_controller.config_flow import (
     SwitchManagerOptionsFlow,
     _build_controller_id,
     _build_controller_schema,
+    _build_windows_doors_schema,
     _controller_name_entity,
     _controller_name_entity_in_use,
     _build_global_config_schema,
@@ -101,6 +102,19 @@ def test_schema_builders_accept_expected_payloads() -> None:
             "notify_with_alarm": False,
         }
     )["main_entity"] == "light.hallway"
+
+
+def test_windows_and_doors_schema_filters_for_opening_device_classes() -> None:
+    """Opening sensors only offer binary sensors that represent openings."""
+    schema = _build_windows_doors_schema()
+    selectors = list(schema.schema.values())
+
+    assert all(selector.config["domain"] == ["binary_sensor"] for selector in selectors)
+    assert all(
+        selector.config["device_class"]
+        == ["door", "window", "garage_door", "gate", "opening"]
+        for selector in selectors
+    )
 
 
 def test_global_schema_accepts_input_booleans_for_mode_helpers() -> None:

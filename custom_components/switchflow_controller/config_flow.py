@@ -445,7 +445,11 @@ def _build_windows_doors_schema(defaults: dict[str, Any] | None = None) -> vol.S
     """Build the third controller step for window and door sensors."""
     values = _controller_schema_values(defaults)
     opening_selector = selector.EntitySelector(
-        selector.EntitySelectorConfig(domain="binary_sensor", multiple=False)
+        selector.EntitySelectorConfig(
+            domain="binary_sensor",
+            device_class=["door", "window", "garage_door", "gate", "opening"],
+            multiple=False,
+        )
     )
     return vol.Schema(
         {

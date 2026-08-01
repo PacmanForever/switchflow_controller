@@ -126,9 +126,10 @@
         },
         "windows_doors": {
           "title": "Finestres i portes",
+          "description": "Quan un d'aquests sensors d'obertura s'activi, s'enviarà una notificació i s'encendrà el llum o interruptor principal si l'alarma està armada.",
           "data": {
-            "opening_sensor_1": "Sensor de finestra o porta 1",
-            "opening_sensor_2": "Sensor de finestra o porta 2"
+            "opening_sensor_1": "Sensor d'obertura de finestra o porta 1",
+            "opening_sensor_2": "Sensor d'obertura de finestra o porta 2"
           }
         },
         "reconfigure_motion_presence": {
@@ -146,9 +147,10 @@
         },
         "reconfigure_windows_doors": {
           "title": "Finestres i portes",
+          "description": "Quan un d'aquests sensors d'obertura s'activi, s'enviarà una notificació i s'encendrà el llum o interruptor principal si l'alarma està armada.",
           "data": {
-            "opening_sensor_1": "Sensor de finestra o porta 1",
-            "opening_sensor_2": "Sensor de finestra o porta 2"
+            "opening_sensor_1": "Sensor d'obertura de finestra o porta 1",
+            "opening_sensor_2": "Sensor d'obertura de finestra o porta 2"
           }
         }
       }

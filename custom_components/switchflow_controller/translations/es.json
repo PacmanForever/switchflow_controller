@@ -126,6 +126,7 @@
         },
         "windows_doors": {
           "title": "Ventanas y puertas",
+          "description": "Cuando uno de estos sensores de apertura se active, SwitchFlow enviará una notificación de alarma y encenderá la luz o el interruptor principal si la alarma está armada.",
           "data": {
             "opening_sensor_1": "Sensor de ventana o puerta 1",
             "opening_sensor_2": "Sensor de ventana o puerta 2"
@@ -146,6 +147,7 @@
         },
         "reconfigure_windows_doors": {
           "title": "Ventanas y puertas",
+          "description": "Cuando uno de estos sensores de apertura se active, SwitchFlow enviará una notificación de alarma y encenderá la luz o el interruptor principal si la alarma está armada.",
           "data": {
             "opening_sensor_1": "Sensor de ventana o puerta 1",
             "opening_sensor_2": "Sensor de ventana o puerta 2"

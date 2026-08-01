@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- Added a concise explanation to the Windows and doors controller step so users know that an armed opening sends a notification and can turn on the main switch/light.
+- Clarified the Catalan opening-sensor labels.
+- Filtered the Windows and doors selectors to binary sensors with opening-related device classes: door, window, garage door, gate, and opening.
+
 ## 0.4.0
 
 - Split controller creation and editing into clear **Switches and lights**, **Motion and presence**, and **Windows and doors** steps, including all English, Catalan, and Spanish translations.
