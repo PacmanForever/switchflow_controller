@@ -158,13 +158,22 @@ If `turn_off_when_presence_clears` is enabled, the controller may turn off early
 
 ### Windows and Doors
 
-Opening sensors are evaluated only while Smart Mode is enabled and the configured alarm is armed. Every `off` to `on` opening transition sends the configured alarm notification script, regardless of the controller's motion-notification preference.
+Opening sensors are evaluated only while Smart Mode is enabled and the alarm is ready. The opening event must be an `off` to `on` transition. This behavior does not depend on the controller's `notify_with_alarm` option.
 
 When the controller's main entity is off, an eligible opening turns it on for the shared `opening_alarm_light_duration`. The default duration is 1 minute. If the main entity is already on from manual use or motion handling, the opening sends a notification but does not change its timer. If a previous opening response owns the light, a new opening restarts only that opening-response timer.
 
 When the opening-response timer finishes, it turns off the main entity only when that response originally turned it on. It does not interfere with the normal motion/presence shutdown timer.
 
-When armed motion triggers the per-controller alarm notification path and turns on an off main entity, it uses the same `opening_alarm_light_duration`. Motion that does not activate this alarm path continues to use the controller's normal `wait_time`.
+### Alarm Sensor Behavior
+
+The alarm is ready when the selected `alarm_entity` is in one of these states: `armed_away`, `armed_home`, `armed_night`, `armed_vacation`, or `armed_custom_bypass`. If `alarm_timer_entity` is configured, it must be `idle`; an active delay timer suppresses the alarm response.
+
+| Sensor event | Requirements | Notification | Light and timer behavior |
+| --- | --- | --- | --- |
+| Motion or presence becomes `on` | Smart Mode enabled, `notify_with_alarm` enabled, and alarm ready | Calls the global notification script when it is selected and available | If the main entity was off, turns it on and turns it off after `opening_alarm_light_duration`. If it was already on, its normal controller `wait_time` is restarted. |
+| Window or door changes from `off` to `on` | Smart Mode enabled and alarm ready | Calls the global notification script when it is selected and available, even when `notify_with_alarm` is disabled | If the main entity was off, turns it on and turns it off after `opening_alarm_light_duration`. If it was already on, its current timer is not changed. |
+
+Motion that does not activate the alarm path follows the configured normal activation rules and uses the controller's `wait_time`.
 
 ## Alarm Notifications
 
@@ -173,7 +182,7 @@ Alarm notifications are split into two parts:
 - the decision to notify is per controller through `notify_with_alarm`
 - the action used to notify is global through `alarm_notification_script_entity`
 
-The notification action must be configured as a `script` entity, not as a free-form service string.
+The notification action must be configured as a `script` entity, not as a free-form service string. The selected script must be available when the sensor event occurs.
 
 If no notification script is configured, the controller skips notification safely.
 
