@@ -86,7 +86,7 @@
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
             "turn_off_when_presence_clears": "Apaga quan els sensors es restableixin (pot apagar abans del retard)",
-            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)",
+            "wait_time": "Retard d'apagat (si el sensor no es restableix abans)",
             "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
             "turn_off_entity_1": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 1",
             "turn_off_entity_2": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 2"
@@ -105,7 +105,7 @@
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
             "turn_off_when_presence_clears": "Apaga quan els sensors es restableixin (pot apagar abans del retard)",
-            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)",
+            "wait_time": "Retard d'apagat (si el sensor no es restableix abans)",
             "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
             "turn_off_entity_1": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 1",
             "turn_off_entity_2": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 2"
@@ -121,7 +121,7 @@
             "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
-            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)"
+            "wait_time": "Retard d'apagat (si el sensor no es restableix abans)"
           }
         },
         "windows_doors": {
@@ -142,7 +142,7 @@
             "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
-            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)"
+            "wait_time": "Retard d'apagat (si el sensor no es restableix abans)"
           }
         },
         "reconfigure_windows_doors": {

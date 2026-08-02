@@ -86,7 +86,7 @@
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
             "turn_off_when_presence_clears": "Apagar cuando los sensores se restablezcan (puede apagarse antes del retardo)",
-            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)",
+            "wait_time": "Retardo de apagado (si el sensor no se restablece antes)",
             "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
             "turn_off_entity_1": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 1",
             "turn_off_entity_2": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 2"
@@ -105,7 +105,7 @@
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
             "turn_off_when_presence_clears": "Apagar cuando los sensores se restablezcan (puede apagarse antes del retardo)",
-            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)",
+            "wait_time": "Retardo de apagado (si el sensor no se restablece antes)",
             "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
             "turn_off_entity_1": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 1",
             "turn_off_entity_2": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 2"
@@ -121,7 +121,7 @@
             "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
-            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)"
+            "wait_time": "Retardo de apagado (si el sensor no se restablece antes)"
           }
         },
         "windows_doors": {
@@ -142,7 +142,7 @@
             "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
-            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)"
+            "wait_time": "Retardo de apagado (si el sensor no se restablece antes)"
           }
         },
         "reconfigure_windows_doors": {
