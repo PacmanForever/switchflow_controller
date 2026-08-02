@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5
+
+- Refined the controller setup flow: delayed shutoff is the first timing field, and the motion/presence and opening-detection steps have clearer titles.
+- Updated the controller UI to consistently use sensor terminology across English, Catalan, and Spanish.
+- Clarified that either the main or night switch/light can turn off the two configured linked entities.
+
 ## 0.4.4
 
 - Updated alarm messages to use the Home Assistant area of the configured main switch/light, including areas inherited through the light's device. The controller name remains the fallback when no area is configured.

@@ -398,6 +398,14 @@ def _build_motion_presence_schema(defaults: dict[str, Any] | None = None) -> vol
     return vol.Schema(
         {
             vol.Required(
+                CONF_WAIT_TIME,
+                default=_wait_time_selector_default(
+                    values.wait_time if values else DEFAULT_WAIT_TIME_SECONDS
+                ),
+            ): selector.DurationSelector(
+                selector.DurationSelectorConfig(enable_day=False, allow_negative=False)
+            ),
+            vol.Required(
                 CONF_ACTIVATE_ON_DETECTION,
                 default=values.activate_on_detection if values else False,
             ): selector.BooleanSelector(),
@@ -429,14 +437,6 @@ def _build_motion_presence_schema(defaults: dict[str, Any] | None = None) -> vol
                 sensor_selector,
                 values.illuminance_sensor if values else None,
             ): sensor_selector,
-            vol.Required(
-                CONF_WAIT_TIME,
-                default=_wait_time_selector_default(
-                    values.wait_time if values else DEFAULT_WAIT_TIME_SECONDS
-                ),
-            ): selector.DurationSelector(
-                selector.DurationSelectorConfig(enable_day=False, allow_negative=False)
-            ),
         }
     )
 

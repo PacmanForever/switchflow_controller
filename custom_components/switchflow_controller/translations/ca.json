@@ -80,16 +80,16 @@
             "main_entity": "Llum o interruptor principal",
             "night_entity": "Llum o interruptor nocturn",
             "use_night_entity_name": "Fer servir el nom del llum o interruptor nocturn",
-            "activate_on_detection": "Encén quan un dels detectors de moviment o presència s'activa",
-            "detector_sensor_1": "Detector de moviment o presència 1",
-            "detector_sensor_2": "Detector de moviment o presència 2",
+            "activate_on_detection": "Encén quan un dels sensors de moviment o presència s'activa",
+            "detector_sensor_1": "Sensor de moviment o presència 1",
+            "detector_sensor_2": "Sensor de moviment o presència 2",
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
-            "turn_off_when_presence_clears": "Apaga quan els detectors es restableixin (pot apagar abans del retard)",
-            "wait_time": "Retard d'apagat (si el detector no es neteja abans)",
-            "notify_with_alarm": "Notifica quan un detector de moviment o presència s'activa i l'alarma està armada",
-            "turn_off_entity_1": "En encendre el llum o interruptor principal, apaga el llum o interruptor 1",
-            "turn_off_entity_2": "En encendre el llum o interruptor principal, apaga el llum o interruptor 2"
+            "turn_off_when_presence_clears": "Apaga quan els sensors es restableixin (pot apagar abans del retard)",
+            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)",
+            "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
+            "turn_off_entity_1": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 1",
+            "turn_off_entity_2": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 2"
           }
         },
         "reconfigure": {
@@ -99,33 +99,33 @@
             "main_entity": "Llum o interruptor principal",
             "night_entity": "Llum o interruptor nocturn",
             "use_night_entity_name": "Fer servir el nom del llum o interruptor nocturn",
-            "activate_on_detection": "Encén quan un dels detectors de moviment o presència s'activa",
-            "detector_sensor_1": "Detector de moviment o presència 1",
-            "detector_sensor_2": "Detector de moviment o presència 2",
+            "activate_on_detection": "Encén quan un dels sensors de moviment o presència s'activa",
+            "detector_sensor_1": "Sensor de moviment o presència 1",
+            "detector_sensor_2": "Sensor de moviment o presència 2",
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
-            "turn_off_when_presence_clears": "Apaga quan els detectors es restableixin (pot apagar abans del retard)",
-            "wait_time": "Retard d'apagat (si el detector no es neteja abans)",
-            "notify_with_alarm": "Notifica quan un detector de moviment o presència s'activa i l'alarma està armada",
-            "turn_off_entity_1": "En encendre el llum o interruptor principal, apaga el llum o interruptor 1",
-            "turn_off_entity_2": "En encendre el llum o interruptor principal, apaga el llum o interruptor 2"
+            "turn_off_when_presence_clears": "Apaga quan els sensors es restableixin (pot apagar abans del retard)",
+            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)",
+            "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
+            "turn_off_entity_1": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 1",
+            "turn_off_entity_2": "En encendre el llum o interruptor principal o nocturn, apaga el llum o interruptor 2"
           }
         },
         "motion_presence": {
-          "title": "Moviment i presència",
+          "title": "Temporització i detecció moviment/presència",
           "data": {
-            "activate_on_detection": "Encén quan un dels detectors de moviment o presència s'activa",
-            "turn_off_when_presence_clears": "Apaga quan els detectors es restableixin (pot apagar abans del retard)",
-            "detector_sensor_1": "Detector de moviment o presència 1",
-            "detector_sensor_2": "Detector de moviment o presència 2",
-            "notify_with_alarm": "Notifica quan un detector de moviment o presència s'activa i l'alarma està armada",
+            "activate_on_detection": "Encén quan un dels sensors de moviment o presència s'activa",
+            "turn_off_when_presence_clears": "Apaga quan els sensors es restableixin (pot apagar abans del retard)",
+            "detector_sensor_1": "Sensor de moviment o presència 1",
+            "detector_sensor_2": "Sensor de moviment o presència 2",
+            "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
-            "wait_time": "Retard d'apagat (si el detector no es neteja abans)"
+            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)"
           }
         },
         "windows_doors": {
-          "title": "Finestres i portes",
+          "title": "Detecció d'obertura finestres/portes",
           "description": "Quan un d'aquests sensors d'obertura s'activi, s'enviarà una notificació i s'encendrà el llum o interruptor principal si l'alarma està armada.",
           "data": {
             "opening_sensor_1": "Sensor d'obertura de finestra o porta 1",
@@ -133,20 +133,20 @@
           }
         },
         "reconfigure_motion_presence": {
-          "title": "Moviment i presència",
+          "title": "Temporització i detecció moviment/presència",
           "data": {
-            "activate_on_detection": "Encén quan un dels detectors de moviment o presència s'activa",
-            "turn_off_when_presence_clears": "Apaga quan els detectors es restableixin (pot apagar abans del retard)",
-            "detector_sensor_1": "Detector de moviment o presència 1",
-            "detector_sensor_2": "Detector de moviment o presència 2",
-            "notify_with_alarm": "Notifica quan un detector de moviment o presència s'activa i l'alarma està armada",
+            "activate_on_detection": "Encén quan un dels sensors de moviment o presència s'activa",
+            "turn_off_when_presence_clears": "Apaga quan els sensors es restableixin (pot apagar abans del retard)",
+            "detector_sensor_1": "Sensor de moviment o presència 1",
+            "detector_sensor_2": "Sensor de moviment o presència 2",
+            "notify_with_alarm": "Notifica quan un sensor de moviment o presència s'activa i l'alarma està armada",
             "illuminance_threshold_lux": "Encén si la il·luminància és inferior a (lux)",
             "illuminance_sensor": "Sensor d'il·luminància",
-            "wait_time": "Retard d'apagat (si el detector no es neteja abans)"
+            "wait_time": "Retard d'apagat (si el sensor no es neteja abans)"
           }
         },
         "reconfigure_windows_doors": {
-          "title": "Finestres i portes",
+          "title": "Detecció d'obertura finestres/portes",
           "description": "Quan un d'aquests sensors d'obertura s'activi, s'enviarà una notificació i s'encendrà el llum o interruptor principal si l'alarma està armada.",
           "data": {
             "opening_sensor_1": "Sensor d'obertura de finestra o porta 1",

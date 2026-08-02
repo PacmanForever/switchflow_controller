@@ -80,16 +80,16 @@
             "main_entity": "Luz o interruptor principal",
             "night_entity": "Luz o interruptor nocturno",
             "use_night_entity_name": "Usar el nombre de la luz o interruptor nocturno",
-            "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
-            "detector_sensor_1": "Detector de movimiento o presencia 1",
-            "detector_sensor_2": "Detector de movimiento o presencia 2",
+            "activate_on_detection": "Encender cuando uno de los sensores de movimiento o presencia se active",
+            "detector_sensor_1": "Sensor de movimiento o presencia 1",
+            "detector_sensor_2": "Sensor de movimiento o presencia 2",
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
-            "turn_off_when_presence_clears": "Apagar cuando los detectores se restablezcan (puede apagarse antes del retardo)",
-            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)",
-            "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
-            "turn_off_entity_1": "Al encender la luz o interruptor principal, apagar la luz o interruptor 1",
-            "turn_off_entity_2": "Al encender la luz o interruptor principal, apagar la luz o interruptor 2"
+            "turn_off_when_presence_clears": "Apagar cuando los sensores se restablezcan (puede apagarse antes del retardo)",
+            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)",
+            "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
+            "turn_off_entity_1": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 1",
+            "turn_off_entity_2": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 2"
           }
         },
         "reconfigure": {
@@ -99,33 +99,33 @@
             "main_entity": "Luz o interruptor principal",
             "night_entity": "Luz o interruptor nocturno",
             "use_night_entity_name": "Usar el nombre de la luz o interruptor nocturno",
-            "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
-            "detector_sensor_1": "Detector de movimiento o presencia 1",
-            "detector_sensor_2": "Detector de movimiento o presencia 2",
+            "activate_on_detection": "Encender cuando uno de los sensores de movimiento o presencia se active",
+            "detector_sensor_1": "Sensor de movimiento o presencia 1",
+            "detector_sensor_2": "Sensor de movimiento o presencia 2",
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
-            "turn_off_when_presence_clears": "Apagar cuando los detectores se restablezcan (puede apagarse antes del retardo)",
-            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)",
-            "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
-            "turn_off_entity_1": "Al encender la luz o interruptor principal, apagar la luz o interruptor 1",
-            "turn_off_entity_2": "Al encender la luz o interruptor principal, apagar la luz o interruptor 2"
+            "turn_off_when_presence_clears": "Apagar cuando los sensores se restablezcan (puede apagarse antes del retardo)",
+            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)",
+            "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
+            "turn_off_entity_1": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 1",
+            "turn_off_entity_2": "Al encender la luz o interruptor principal o nocturno, apagar la luz o interruptor 2"
           }
         },
         "motion_presence": {
-          "title": "Movimiento y presencia",
+          "title": "Temporización y detección de movimiento/presencia",
           "data": {
-            "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
-            "turn_off_when_presence_clears": "Apagar cuando los detectores se restablezcan (puede apagarse antes del retardo)",
-            "detector_sensor_1": "Detector de movimiento o presencia 1",
-            "detector_sensor_2": "Detector de movimiento o presencia 2",
-            "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
+            "activate_on_detection": "Encender cuando uno de los sensores de movimiento o presencia se active",
+            "turn_off_when_presence_clears": "Apagar cuando los sensores se restablezcan (puede apagarse antes del retardo)",
+            "detector_sensor_1": "Sensor de movimiento o presencia 1",
+            "detector_sensor_2": "Sensor de movimiento o presencia 2",
+            "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
-            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)"
+            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)"
           }
         },
         "windows_doors": {
-          "title": "Ventanas y puertas",
+          "title": "Detección de apertura de ventanas/puertas",
           "description": "Cuando uno de estos sensores de apertura se active, SwitchFlow enviará una notificación de alarma y encenderá la luz o el interruptor principal si la alarma está armada.",
           "data": {
             "opening_sensor_1": "Sensor de ventana o puerta 1",
@@ -133,20 +133,20 @@
           }
         },
         "reconfigure_motion_presence": {
-          "title": "Movimiento y presencia",
+          "title": "Temporización y detección de movimiento/presencia",
           "data": {
-            "activate_on_detection": "Encender cuando uno de los detectores de movimiento o presencia se active",
-            "turn_off_when_presence_clears": "Apagar cuando los detectores se restablezcan (puede apagarse antes del retardo)",
-            "detector_sensor_1": "Detector de movimiento o presencia 1",
-            "detector_sensor_2": "Detector de movimiento o presencia 2",
-            "notify_with_alarm": "Notificar cuando un detector de movimiento o presencia se active y la alarma esté armada",
+            "activate_on_detection": "Encender cuando uno de los sensores de movimiento o presencia se active",
+            "turn_off_when_presence_clears": "Apagar cuando los sensores se restablezcan (puede apagarse antes del retardo)",
+            "detector_sensor_1": "Sensor de movimiento o presencia 1",
+            "detector_sensor_2": "Sensor de movimiento o presencia 2",
+            "notify_with_alarm": "Notificar cuando un sensor de movimiento o presencia se active y la alarma esté armada",
             "illuminance_threshold_lux": "Encender si la iluminancia es inferior a (lux)",
             "illuminance_sensor": "Sensor de iluminancia",
-            "wait_time": "Retardo de apagado (si el detector no se desactiva antes)"
+            "wait_time": "Retardo de apagado (si el sensor no se desactiva antes)"
           }
         },
         "reconfigure_windows_doors": {
-          "title": "Ventanas y puertas",
+          "title": "Detección de apertura de ventanas/puertas",
           "description": "Cuando uno de estos sensores de apertura se active, SwitchFlow enviará una notificación de alarma y encenderá la luz o el interruptor principal si la alarma está armada.",
           "data": {
             "opening_sensor_1": "Sensor de ventana o puerta 1",
