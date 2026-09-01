@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.6
+
+- Classified SwitchFlow Controller as a service integration so it appears in Home Assistant's Add integration dialog on new installations.
+
 ## 0.4.5
 
 - Refined the controller setup flow: delayed shutoff is the first timing field, and the motion/presence and opening-detection steps have clearer titles.
