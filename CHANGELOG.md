@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.7
+
+- Refreshed the integration brand assets with a clearer switch-focused icon for both the local `brand/` directory and the legacy Home Assistant Brands compatibility path.
+- Added high-DPI 512x512 icon and logo variants so the integration ships the full square asset set expected by modern Home Assistant surfaces.
+
 ## 0.4.6
 
 - Classified SwitchFlow Controller as a service integration so it appears in Home Assistant's Add integration dialog on new installations.
