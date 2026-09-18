@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">SwitchFlow Controller switch-focused concept</title>
+  <desc id="desc">Concept icon with a smart switch plate, a lit rocker, and motion flow accents.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="24" y1="24" x2="232" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0e7c86"/>
+      <stop offset="1" stop-color="#27c2a8"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="72" y1="52" x2="184" y2="204" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#ddf6f3" stop-opacity="0.98"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="20" y="20" width="216" height="216" rx="52" fill="url(#bg)"/>
+
+  <path d="M46 118c9-13 22-22 37-26" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.42"/>
+  <path d="M42 148c13 10 26 15 41 17" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.32"/>
+  <circle cx="54" cy="132" r="7" fill="#ffffff" opacity="0.9"/>
+
+  <rect x="74" y="46" width="108" height="164" rx="26" fill="url(#plate)"/>
+  <rect x="89" y="64" width="78" height="128" rx="20" fill="#0f8f97" opacity="0.14"/>
+
+  <path d="M94 86c0-10 8-18 18-18h32c10 0 18 8 18 18v28c0 10-8 18-18 18h-32c-10 0-18-8-18-18Z" fill="#ffffff"/>
+  <path d="M94 118h68v44c0 10-8 18-18 18h-32c-10 0-18-8-18-18Z" fill="#1bb6aa"/>
+  <path d="M113 148h30" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.95"/>
+
+  <circle cx="128" cy="88" r="7" fill="#1bb6aa"/>
+
+  <path d="M173 92c15 4 28 12 37 25" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.42"/>
+  <path d="M173 167c15-2 29-8 41-17" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.32"/>
+
+  <path d="M197 80v-13" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.92"/>
+  <path d="M218 90l9-9" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.78"/>
+  <path d="M176 90l-9-9" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.78"/>
+  <path d="M224 111h13" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.62"/>
+</svg>
