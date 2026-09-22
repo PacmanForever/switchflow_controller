@@ -43,6 +43,7 @@ The repository should remain ready for:
 
 Relevant workflow files:
 
-- [.github/workflows/tests.yml](.github/workflows/tests.yml)
+- [.github/workflows/tests_unit.yml](.github/workflows/tests_unit.yml)
+- [.github/workflows/tests_component.yml](.github/workflows/tests_component.yml)
 - [.github/workflows/validate_hacs.yml](.github/workflows/validate_hacs.yml)
 - [.github/workflows/validate_hassfest.yml](.github/workflows/validate_hassfest.yml)

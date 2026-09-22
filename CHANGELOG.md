@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.8
+
+- Clarified the repository documentation for HACS default inclusion, including the correct unit and component workflow files.
+- Added a dedicated HACS default submission handoff note and aligned the release checklist with the real GitHub release requirement.
+
 ## 0.4.7
 
 - Refreshed the integration brand assets with a clearer switch-focused icon for both the local `brand/` directory and the legacy Home Assistant Brands compatibility path.

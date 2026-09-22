@@ -2,7 +2,8 @@
 
 [![HACS][hacsbadge]][hacs]
 [![Version](https://img.shields.io/github/v/tag/PacmanForever/switchflow_controller?label=version)](https://github.com/PacmanForever/switchflow_controller/tags)
-[![Tests](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests.yml)
+[![Unit Tests](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests_unit.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests_unit.yml)
+[![Component Tests](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests_component.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests_component.yml)
 [![Validate HACS](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hacs.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hacs.yml)
 [![Validate Hassfest](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hassfest.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hassfest.yml)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -42,6 +43,10 @@ The integration UI is currently available in:
 
 ### Via HACS
 
+Current state: the repository is ready to be installed through HACS as a custom repository.
+
+After it is accepted into the HACS default repository list, the custom-repository step below is no longer needed.
+
 1. Make sure [HACS](https://hacs.xyz/) is installed.
 2. Open HACS.
 3. Go to `Integrations`.
@@ -51,7 +56,19 @@ The integration UI is currently available in:
 7. Install `SwitchFlow Controller`.
 8. Restart Home Assistant.
 
-The repository already includes [validate_hacs.yml](.github/workflows/validate_hacs.yml) and [validate_hassfest.yml](.github/workflows/validate_hassfest.yml) so release readiness can be checked in CI.
+The repository already includes CI validation for unit tests, component tests, HACS validation, and Hassfest validation.
+
+### HACS Default Repository Submission
+
+To appear in the default HACS catalog without manually adding this repository, complete these release steps:
+
+1. Publish a GitHub release whose tag matches the manifest version.
+2. Confirm the GitHub repository is public and has a clear description, topics, and release notes.
+3. Ensure the HACS and Hassfest workflows are green on `main`.
+4. Open a pull request against `hacs/default` adding this repository in the `integration` category.
+5. Wait for the HACS maintainers to review and merge that submission.
+
+This repository is structured for step 4 already, but the actual inclusion in the default catalog must be completed from GitHub.
 
 ### Manual
 
@@ -319,7 +336,7 @@ The integration should be built with conservative Home Assistant APIs and straig
 
 If architecture decisions change during implementation, update `PLAN.md` first and then update the code.
 
-For release preparation, run the local test slice first and then rely on the GitHub workflows in [.github/workflows/tests.yml](.github/workflows/tests.yml), [.github/workflows/validate_hacs.yml](.github/workflows/validate_hacs.yml), and [.github/workflows/validate_hassfest.yml](.github/workflows/validate_hassfest.yml).
+For release preparation, run the local test slice first and then rely on the GitHub workflows in [.github/workflows/tests_unit.yml](.github/workflows/tests_unit.yml), [.github/workflows/tests_component.yml](.github/workflows/tests_component.yml), [.github/workflows/validate_hacs.yml](.github/workflows/validate_hacs.yml), and [.github/workflows/validate_hassfest.yml](.github/workflows/validate_hassfest.yml).
 
 Contributor-facing repository guidance is available in [CONTRIBUTING.md](CONTRIBUTING.md), [QUALITY.md](QUALITY.md), and [tests/README.md](tests/README.md).
 
