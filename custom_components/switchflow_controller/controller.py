@@ -313,30 +313,42 @@ class ControllerRuntime:
     async def _async_send_alarm_notification(
         self, trigger_entity_id: str | None, event_description: str
     ) -> None:
-        """Send the configured alarm script notification for one triggering entity."""
-        if self.global_config.alarm_notification_script_entity is None:
+        """Send the configured alarm notification for one triggering entity."""
+        notification_entity_id = self.global_config.alarm_notification_script_entity
+        if notification_entity_id is None:
             return
 
-        script_state = self._get_state(
-            self.global_config.alarm_notification_script_entity,
+        domain, object_id = notification_entity_id.split(".", 1)
+        notification_state = self._get_state(
+            notification_entity_id,
             CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY,
+            allow_unknown=domain == "notify",
         )
-        if script_state is None:
+        if notification_state is None:
             return
 
-        await self.hass.services.async_call(
-            "script",
-            self.global_config.alarm_notification_script_entity.split(".", 1)[1],
-            {
-                "message": (
-                    f"SwitchFlow Controller alarm: {event_description} "
-                    f"in {self._controller_area_name()}"
-                ),
-                "controller_name": self.controller.name,
-                "trigger_entity_id": trigger_entity_id,
-            },
-            blocking=True,
+        message = (
+            f"SwitchFlow Controller alarm: {event_description} "
+            f"in {self._controller_area_name()}"
         )
+        if domain == "script":
+            await self.hass.services.async_call(
+                "script",
+                object_id,
+                {
+                    "message": message,
+                    "controller_name": self.controller.name,
+                    "trigger_entity_id": trigger_entity_id,
+                },
+                blocking=True,
+            )
+        else:
+            await self.hass.services.async_call(
+                "notify",
+                "send_message",
+                {"entity_id": notification_entity_id, "message": message},
+                blocking=True,
+            )
 
     def _controller_area_name(self) -> str:
         """Return the main entity's Home Assistant area name when available."""
@@ -628,11 +640,15 @@ class ControllerRuntime:
         state = self._get_state(entity_id, field_name)
         return state is not None and state.state == STATE_ON
 
-    def _get_state(self, entity_id: str, field_name: str) -> State | None:
+    def _get_state(
+        self, entity_id: str, field_name: str, *, allow_unknown: bool = False
+    ) -> State | None:
         """Read an entity state and warn once when a configured entity is unavailable."""
         state = self.hass.states.get(entity_id)
         issue_key = (field_name, entity_id)
-        if state is None or state.state in {STATE_UNAVAILABLE, STATE_UNKNOWN}:
+        if state is None or state.state == STATE_UNAVAILABLE or (
+            state.state == STATE_UNKNOWN and not allow_unknown
+        ):
             if self.hass.state is not CoreState.running:
                 return None
             if (

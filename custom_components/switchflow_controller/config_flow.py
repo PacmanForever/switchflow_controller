@@ -221,11 +221,15 @@ def _build_global_config_schema(defaults: dict[str, Any] | None = None) -> vol.S
             _optional_selector_field(
                 CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY,
                 selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="script", multiple=False)
+                    selector.EntitySelectorConfig(
+                        domain=["script", "notify"], multiple=False
+                    )
                 ),
                 values.alarm_notification_script_entity,
             ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="script", multiple=False)
+                selector.EntitySelectorConfig(
+                    domain=["script", "notify"], multiple=False
+                )
             ),
             vol.Required(
                 CONF_OPENING_ALARM_LIGHT_DURATION,

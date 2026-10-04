@@ -19,7 +19,7 @@ Run locally:
 
 ```bash
 /home/pacman/Projectes/switchflow_controller/.venv/bin/python -m compileall custom_components tests
-/home/pacman/Projectes/switchflow_controller/.venv/bin/python -m pytest tests/unit/test_models.py tests/unit/test_storage_migrations.py tests/component/test_services.py tests/component/test_issues.py tests/component/test_config_flow.py tests/component/test_controller_runtime.py tests/component/test_alarm_notifications.py tests/component/test_illuminance_behavior.py tests/component/test_delayed_shutoff.py -q
+/home/pacman/Projectes/switchflow_controller/.venv/bin/python -m pytest -q
 ```
 
 Then confirm GitHub Actions passes:

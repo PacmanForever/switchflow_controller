@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.9
+
+- Added direct alarm notifications to Home Assistant `notify.*` entities while preserving the existing script-based notification path and its additional script fields.
+- Updated the alarm notification selector to accept either a script or a notify entity.
+
 ## 0.4.8
 
 - Clarified the repository documentation for HACS default inclusion, including the correct unit and component workflow files.

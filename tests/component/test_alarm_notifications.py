@@ -76,6 +76,43 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
 
 
 @pytest.mark.asyncio
+async def test_alarm_notification_calls_notify_entity(hass) -> None:
+    """Alarm notifications can be sent directly to a notify entity."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 60,
+        }
+    )
+    global_config = GlobalConfig.from_mapping(
+        {
+            "alarm_notification_script_entity": "notify.mobile_app_phone",
+        }
+    )
+    notify_calls: list[dict] = []
+
+    async def handle_notify(call) -> None:
+        notify_calls.append(call.data)
+
+    hass.services.async_register("notify", "send_message", handle_notify)
+    hass.states.async_set("notify.mobile_app_phone", "unknown")
+    runtime = ControllerRuntime(hass, global_config, controller, "entry-1")
+
+    await runtime._async_send_alarm_notification(
+        "binary_sensor.hallway_motion", "Motion or presence detected"
+    )
+
+    assert notify_calls == [
+        {
+            "entity_id": "notify.mobile_app_phone",
+            "message": "SwitchFlow Controller alarm: Motion or presence detected in Hallway",
+        }
+    ]
+
+
+@pytest.mark.asyncio
 async def test_armed_motion_uses_opening_alarm_light_timer(hass) -> None:
     """An armed motion alarm response uses the global opening-light duration."""
     controller = ControllerConfig.from_mapping(
