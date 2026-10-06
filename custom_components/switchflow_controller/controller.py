@@ -408,10 +408,12 @@ class ControllerRuntime:
                 self.controller.main_entity,
                 field_name=CONF_MAIN_ENTITY,
             ):
-                if self.controller.night_entity and not await self._async_is_entity_on(
-                    self.controller.night_entity,
-                    field_name=CONF_NIGHT_ENTITY,
-                ):
+                if self.controller.night_entity:
+                    if await self._async_is_entity_on(
+                        self.controller.night_entity,
+                        field_name=CONF_NIGHT_ENTITY,
+                    ):
+                        return True
                     await self._async_turn_on_entity(self.controller.night_entity)
                     return True
 

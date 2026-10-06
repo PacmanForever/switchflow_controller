@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.10
+
+- Fixed repeated motion or presence detection in night mode so an already-on night light does not turn on the main light.
+- Added regression coverage for repeated detection while the night light is active.
+
 ## 0.4.9
 
 - Added direct alarm notifications to Home Assistant `notify.*` entities while preserving the existing script-based notification path and its additional script fields.
