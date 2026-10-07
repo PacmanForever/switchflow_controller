@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.11
+
+- Ensure motion and presence alarm notifications require an active detector, an armed alarm, and the notification option to be enabled. Opening notifications are unchanged.
+
 ## 0.4.10
 
 - Fixed repeated motion or presence detection in night mode so an already-on night light does not turn on the main light.

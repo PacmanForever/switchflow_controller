@@ -369,10 +369,13 @@ class ControllerRuntime:
             return False
         if not await self._async_alarm_is_ready():
             return False
+        trigger_entity_id = self._first_active_detector()
+        if trigger_entity_id is None:
+            return False
 
         await self._async_turn_on_entity(self.controller.main_entity)
         await self._async_send_alarm_notification(
-            self._first_active_detector(), "Motion or presence detected"
+            trigger_entity_id, "Motion or presence detected"
         )
 
         return True

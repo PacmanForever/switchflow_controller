@@ -76,6 +76,52 @@ async def test_alarm_notification_path_turns_on_main_and_calls_script(hass) -> N
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("notify_with_alarm", "alarm_state", "motion_state"),
+    [
+        (False, "armed_away", "on"),
+        (True, "disarmed", "on"),
+        (True, "armed_away", "off"),
+    ],
+)
+async def test_motion_alarm_notification_requires_all_conditions(
+    hass, notify_with_alarm: bool, alarm_state: str, motion_state: str
+) -> None:
+    """Motion alarm notification requires an enabled option, armed alarm, and detection."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "detector_sensor_1": "binary_sensor.hallway_motion",
+            "wait_time": 60,
+            "notify_with_alarm": notify_with_alarm,
+        }
+    )
+    global_config = GlobalConfig.from_mapping(
+        {
+            "alarm_entity": "alarm_control_panel.house",
+            "alarm_notification_script_entity": "script.notify_alarm",
+        }
+    )
+    script_calls: list[dict] = []
+
+    async def handle_script(call) -> None:
+        script_calls.append(call.data)
+
+    hass.services.async_register("script", "notify_alarm", handle_script)
+    hass.states.async_set("binary_sensor.hallway_motion", motion_state)
+    hass.states.async_set("alarm_control_panel.house", alarm_state)
+    hass.states.async_set("script.notify_alarm", "off")
+    runtime = ControllerRuntime(hass, global_config, controller, "entry-1")
+
+    activated = await runtime._async_run_alarm_notification_path()
+
+    assert activated is False
+    assert script_calls == []
+
+
+@pytest.mark.asyncio
 async def test_alarm_notification_calls_notify_entity(hass) -> None:
     """Alarm notifications can be sent directly to a notify entity."""
     controller = ControllerConfig.from_mapping(
