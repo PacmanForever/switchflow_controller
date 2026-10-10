@@ -130,7 +130,7 @@ Create `hacs.json` at the repository root:
   "name": "Integration Name",
   "content_in_root": false,
   "render_readme": true,
-  "homeassistant": "2024.1.0"
+  "homeassistant": "2025.3.0"
 }
 ```
 

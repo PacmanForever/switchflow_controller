@@ -115,6 +115,7 @@
   "config_subentries": {
     "controller": {
       "abort": {
+        "reconfigure_success": "Controller updated",
         "reconfigure_successful": "Controller updated"
       },
       "error": {

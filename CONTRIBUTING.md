@@ -11,8 +11,8 @@ Contributions should preserve the current project direction:
 
 ## Before Opening a Pull Request
 
-1. Read [PLAN.md](PLAN.md) and keep it as the source of truth for behavior and scope.
-2. Check whether the change is already covered by [README.md](README.md), [QUALITY.md](QUALITY.md), or an existing test.
+1. Read [README.md](README.md) for user-facing behavior and [QUALITY.md](QUALITY.md) for project quality requirements.
+2. Check whether the change is already covered by an existing test.
 3. Keep the change focused. Avoid bundling unrelated refactors.
 
 ## Development Expectations
@@ -42,7 +42,7 @@ Also check the project compiles cleanly:
 1. Keep optional configuration behavior non-blocking when not configured.
 2. Treat configured-but-unavailable entities as visible configuration problems.
 3. Add or update tests when behavior changes.
-4. Update [PLAN.md](PLAN.md) first if the architecture or intended behavior changes.
+4. Update [README.md](README.md) when user-facing behavior changes.
 5. Update [CHANGELOG.md](CHANGELOG.md) when preparing a release-facing change.
 
 ## Pull Request Notes

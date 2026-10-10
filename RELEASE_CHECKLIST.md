@@ -33,7 +33,7 @@ Then confirm GitHub Actions passes:
 
 1. Ensure [LICENSE](LICENSE), [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [QUALITY.md](QUALITY.md) are up to date.
 2. Confirm [custom_components/switchflow_controller/services.yaml](custom_components/switchflow_controller/services.yaml) reflects the actual service surface.
-3. Confirm [PLAN.md](PLAN.md) still matches the implemented architecture and deferred scope.
+3. Confirm [README.md](README.md) describes the implemented user-facing behavior and [CHANGELOG.md](CHANGELOG.md) includes the release changes.
 4. Decide whether to keep or remove development-only folders from version control expectations, such as `.vscode`.
 
 ## Final Manual Checks

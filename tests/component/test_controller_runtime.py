@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
@@ -65,6 +66,132 @@ async def test_opening_sensor_event_dispatches_with_its_state_transition(hass) -
 
 
 @pytest.mark.asyncio
+async def test_concurrent_timer_restarts_leave_only_one_timer_active(hass) -> None:
+    """Concurrent normal and alarm restarts must not leave both timers running."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    await runtime._timer_lock.acquire()
+    alarm_lock = getattr(runtime, "_opening_alarm_timer_lock", runtime._timer_lock)
+    if alarm_lock is not runtime._timer_lock:
+        await alarm_lock.acquire()
+
+    normal_restart = asyncio.create_task(runtime._async_restart_timer())
+    await asyncio.sleep(0)
+    alarm_restart = asyncio.create_task(
+        runtime._async_restart_opening_alarm_timer({"light.hallway"})
+    )
+    await asyncio.sleep(0)
+    if alarm_lock is not runtime._timer_lock:
+        alarm_lock.release()
+    await asyncio.sleep(0)
+    runtime._timer_lock.release()
+
+    await asyncio.gather(normal_restart, alarm_restart)
+    try:
+        assert runtime._timer_task is None
+        assert runtime._opening_alarm_timer_task is not None
+    finally:
+        await runtime.async_stop()
+
+
+@pytest.mark.asyncio
+async def test_reset_timer_keeps_global_duration_when_alarm_is_ready(hass) -> None:
+    """Resetting an active timer while armed must keep the alarm duration."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"alarm_entity": "alarm_control_panel.house"}),
+        controller,
+        "entry-1",
+    )
+    hass.states.async_set("light.hallway", "on")
+    hass.states.async_set("alarm_control_panel.house", "armed_away")
+    runtime._async_restart_timer = AsyncMock()
+    runtime._async_restart_opening_alarm_timer = AsyncMock()
+
+    await runtime.async_reset_timer()
+
+    runtime._async_restart_opening_alarm_timer.assert_awaited_once_with(
+        {"light.hallway"}
+    )
+    runtime._async_restart_timer.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_reset_timer_preserves_alarm_timer_after_alarm_disarms(hass) -> None:
+    """Resetting an active alarm timer keeps its duration after disarming."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"alarm_entity": "alarm_control_panel.house"}),
+        controller,
+        "entry-1",
+    )
+    hass.states.async_set("light.hallway", "on")
+    hass.states.async_set("alarm_control_panel.house", "disarmed")
+    runtime._opening_alarm_owns_main = True
+    runtime._opening_alarm_timer_task = object()
+    runtime._async_restart_timer = AsyncMock()
+    runtime._async_restart_opening_alarm_timer = AsyncMock()
+
+    await runtime.async_reset_timer()
+
+    runtime._async_restart_opening_alarm_timer.assert_awaited_once_with(
+        {"light.hallway"}
+    )
+    runtime._async_restart_timer.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_reset_timer_uses_normal_delay_when_alarm_is_disarmed(hass) -> None:
+    """Resetting a normal active timer while disarmed keeps the controller delay."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+        }
+    )
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"alarm_entity": "alarm_control_panel.house"}),
+        controller,
+        "entry-1",
+    )
+    hass.states.async_set("light.hallway", "on")
+    hass.states.async_set("alarm_control_panel.house", "disarmed")
+    runtime._async_restart_timer = AsyncMock()
+    runtime._async_restart_opening_alarm_timer = AsyncMock()
+
+    await runtime.async_reset_timer()
+
+    runtime._async_restart_timer.assert_awaited_once()
+    runtime._async_restart_opening_alarm_timer.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_main_off_clears_opening_alarm_ownership_and_timer(hass) -> None:
     """Manual main-light shutdown must cancel only the opening alarm timer ownership."""
     controller = ControllerConfig.from_mapping(
@@ -113,6 +240,14 @@ async def test_detector_clear_turns_off_entities_early(hass) -> None:
     )
 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._opening_alarm_owns_main = True
+    runtime._opening_alarm_owns_night = True
+
+    async def parked_alarm_timer() -> None:
+        await asyncio.Future()
+
+    alarm_timer_task = hass.async_create_task(parked_alarm_timer())
+    runtime._opening_alarm_timer_task = alarm_timer_task
     runtime._async_turn_off_entity = AsyncMock()
 
     await runtime._async_handle_detector_state_change(
@@ -126,6 +261,9 @@ async def test_detector_clear_turns_off_entities_early(hass) -> None:
     assert runtime._async_turn_off_entity.await_count == 2
     assert runtime._async_turn_off_entity.await_args_list[0].args[0] == "light.hallway"
     assert runtime._async_turn_off_entity.await_args_list[1].args[0] == "light.hallway_night"
+    assert alarm_timer_task.cancelled()
+    assert runtime._opening_alarm_owns_main is False
+    assert runtime._opening_alarm_owns_night is False
 
 
 @pytest.mark.asyncio

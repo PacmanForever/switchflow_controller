@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.12
+
+- Use the shared fixed alarm-light duration for eligible armed motion and opening events, independently of motion notifications. New events restart one timer per controller, and expiry turns off managed lights even while detectors remain active.
+- Ignore the armed-alarm response if the configured alarm delay timer is missing, unavailable, unknown, or not idle.
+- Add translations for the alternate controller reconfiguration success reason.
+- Raise the minimum supported Home Assistant version to 2025.3.0 for config subentry support.
+
 ## 0.4.11
 
 - Ensure motion and presence alarm notifications require an active detector, an armed alarm, and the notification option to be enabled. Opening notifications are unchanged.

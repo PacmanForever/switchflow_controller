@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 ![Coverage](https://img.shields.io/badge/coverage-%E2%89%A595%25-blue)
 
-![Home Assistant](https://img.shields.io/badge/home%20assistant-2024.1.0%2B-blue)
+![Home Assistant](https://img.shields.io/badge/home%20assistant-2025.3.0%2B-blue)
 
 A community Home Assistant custom integration for managing reusable motion-driven light and switch controllers with shared global configuration and per-controller behavior.
 
@@ -27,8 +27,8 @@ A community Home Assistant custom integration for managing reusable motion-drive
 - Optional numeric illuminance threshold gating in lux
 - Delayed shutoff with motion-clear waiting, defaulting to one hour
 - Optional per-controller alarm notification behavior
-- Armed window and door opening notifications with an optional temporary main-light response
-- Global script-based alarm notification action with the opening-alarm light duration
+- Armed motion and window/door responses using a shared, fixed-duration light timer
+- Global script-based alarm notification action and alarm-light duration
 - Conservative Home Assistant integration design focused on long-term maintainability
 
 ## Languages
@@ -169,6 +169,8 @@ Leaving the threshold empty does not apply illuminance gating. Existing stored t
 
 After activation, the controller waits for the configured delay and then waits until motion sensors are clear before turning entities off.
 
+This normal `wait_time` behavior applies when the alarm is not ready. When the alarm is ready, an eligible motion or opening response uses the global alarm-light duration instead and does not wait for detectors to clear.
+
 The shutoff model is intentionally restart-like so stale pending timers are cancelled when new triggers arrive.
 
 If `turn_off_when_presence_clears` is enabled, the controller may turn off early as soon as all configured detectors are clear, regardless of whether they are motion or presence sensors.
@@ -177,9 +179,7 @@ If `turn_off_when_presence_clears` is enabled, the controller may turn off early
 
 Opening sensors are evaluated only while Smart Mode is enabled and the alarm is ready. The opening event must be an `off` to `on` transition. This behavior does not depend on the controller's `notify_with_alarm` option.
 
-When the controller's main entity is off, an eligible opening turns it on for the shared `opening_alarm_light_duration`. The default duration is 1 minute. If the main entity is already on from manual use or motion handling, the opening sends a notification but does not change its timer. If a previous opening response owns the light, a new opening restarts only that opening-response timer.
-
-When the opening-response timer finishes, it turns off the main entity only when that response originally turned it on. It does not interfere with the normal motion/presence shutdown timer.
+An eligible opening turns on the main entity if needed and starts or restarts the controller's alarm-light timer. If motion already started a normal controller timer, the opening switches it to the global alarm-light duration. The default duration is 1 minute.
 
 ### Alarm Sensor Behavior
 
@@ -187,10 +187,12 @@ The alarm is ready when the selected `alarm_entity` is in one of these states: `
 
 | Sensor event | Requirements | Notification | Light and timer behavior |
 | --- | --- | --- | --- |
-| Motion or presence becomes `on` | Smart Mode enabled, `notify_with_alarm` enabled, and alarm ready | Calls the global notification script when it is selected and available | If the main entity was off, turns it on and turns it off after `opening_alarm_light_duration`. If it was already on, its normal controller `wait_time` is restarted. |
-| Window or door changes from `off` to `on` | Smart Mode enabled and alarm ready | Calls the global notification script when it is selected and available, even when `notify_with_alarm` is disabled | If the main entity was off, turns it on and turns it off after `opening_alarm_light_duration`. If it was already on, its current timer is not changed. |
+| Motion or presence becomes `on` | Smart Mode enabled, alarm ready, and an activation path controls a light | Depends on `notify_with_alarm`; notification is optional | Uses the global `opening_alarm_light_duration`, even when notifications are disabled. |
+| Window or door changes from `off` to `on` | Smart Mode enabled and alarm ready | Calls the global notification action when selected and available, regardless of `notify_with_alarm` | Turns on the main entity if needed and uses the global `opening_alarm_light_duration`. |
 
-Motion that does not activate the alarm path follows the configured normal activation rules and uses the controller's `wait_time`.
+Motion and opening events share one alarm-light timer per controller. Each new eligible event restarts that timer and supersedes the controller's normal `wait_time` for the lights it manages. When the configured duration expires, those lights are turned off even if a detector still reports motion or presence. The global duration setting is shared, but timers for different controllers are independent.
+
+If the alarm is not ready, motion follows the configured normal activation and shutoff rules, including `wait_time`. An opening does not take ownership of a light that was already on without an active controller timer.
 
 ## Alarm Notifications
 
@@ -258,7 +260,7 @@ max_exceeded: silent
 - `alarm_entity`: armed alarm panel (global setting)
 - `alarm_notification_script_entity`: notification script (global setting)
 
-An opening while the alarm is armed sends a notification. If the entrance light is off, the integration turns it on for one minute and then turns it back off unless the light was already being managed by a previous opening response.
+While the alarm is ready, an opening or qualifying motion event uses the shared one-minute alarm-light timer for that controller. Each new event restarts the timer; expiry turns off the lights it manages even if a detector remains active. Notifications remain optional for motion.
 
 ## Manual Migration From Blueprint
 
@@ -334,7 +336,7 @@ The project should include:
 
 The integration should be built with conservative Home Assistant APIs and straightforward runtime logic.
 
-If architecture decisions change during implementation, update `PLAN.md` first and then update the code.
+Keep this README focused on user-facing behavior. Add specific regression tests for edge cases and timer interactions.
 
 For release preparation, run the local test slice first and then rely on the GitHub workflows in [.github/workflows/tests_unit.yml](.github/workflows/tests_unit.yml), [.github/workflows/tests_component.yml](.github/workflows/tests_component.yml), [.github/workflows/validate_hacs.yml](.github/workflows/validate_hacs.yml), and [.github/workflows/validate_hassfest.yml](.github/workflows/validate_hassfest.yml).
 

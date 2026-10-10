@@ -60,6 +60,7 @@
   "config_subentries": {
     "controller": {
       "abort": {
+        "reconfigure_success": "Controlador actualitzat",
         "reconfigure_successful": "Controlador actualitzat"
       },
       "error": {
