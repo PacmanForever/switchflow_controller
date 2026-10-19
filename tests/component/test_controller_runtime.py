@@ -9,6 +9,7 @@ import pytest
 
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import Event, State
+from homeassistant.helpers import issue_registry as ir
 
 from custom_components.switchflow_controller.controller import ControllerRuntime
 from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
@@ -63,6 +64,35 @@ async def test_opening_sensor_event_dispatches_with_its_state_transition(hass) -
     runtime._async_handle_opening_state_change.assert_awaited_once_with(
         "binary_sensor.hallway_window", old_state, new_state
     )
+
+
+@pytest.mark.asyncio
+async def test_recovered_global_entity_clears_unavailable_issue(hass) -> None:
+    """A global entity recovery should clear its Repairs issue automatically."""
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"alarm_entity": "alarm_control_panel.house"}),
+        ControllerConfig.from_mapping(
+            {
+                "id": "hallway",
+                "name": "Hallway",
+                "main_entity": "light.hallway",
+                "wait_time": 60,
+            }
+        ),
+        "entry-1",
+    )
+    await runtime.async_start()
+    runtime._get_state("alarm_control_panel.house", "alarm_entity")
+
+    assert "alarm_control_panel.house" in runtime._configured_listener_entities()
+
+    hass.states.async_set("alarm_control_panel.house", "armed_away")
+    await hass.async_block_till_done()
+
+    issue_registry = ir.async_get(hass)
+    assert not issue_registry.issues
+    await runtime.async_stop()
 
 
 @pytest.mark.asyncio

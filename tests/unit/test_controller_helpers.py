@@ -599,6 +599,10 @@ async def test_entity_helpers_cover_service_calls_and_detector_state_checks(hass
 
     assert runtime._configured_listener_entities() == [
         "binary_sensor.smart",
+        "binary_sensor.night_mode",
+        "alarm_control_panel.house",
+        "timer.house",
+        "script.notify",
         "light.night",
         "binary_sensor.motion1",
         "binary_sensor.motion2",

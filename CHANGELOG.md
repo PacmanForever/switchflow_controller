@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.13
+
+- Deduplicate unavailable-entity Repairs issues shared by multiple controllers and clear them automatically when the entity recovers.
+
 ## 0.4.12
 
 - Use the shared fixed alarm-light duration for eligible armed motion and opening events, independently of motion notifications. New events restart one timer per controller, and expiry turns off managed lights even while detectors remain active.

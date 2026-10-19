@@ -160,6 +160,10 @@ class ControllerRuntime:
             entity_id
             for entity_id in (
                 self.global_config.smart_mode_entity,
+                self.global_config.night_mode_entity,
+                self.global_config.alarm_entity,
+                self.global_config.alarm_timer_entity,
+                self.global_config.alarm_notification_script_entity,
                 self.controller.night_entity,
                 self.controller.detector_sensor_1,
                 self.controller.detector_sensor_2,
@@ -208,6 +212,17 @@ class ControllerRuntime:
         new_state = event.data.get("new_state")
         if new_state is None:
             return
+
+        for field_name, unavailable_entity_id in tuple(self._unavailable_entities):
+            if unavailable_entity_id == entity_id:
+                self._get_state(
+                    entity_id,
+                    field_name,
+                    allow_unknown=(
+                        field_name == CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY
+                        and entity_id.startswith("notify.")
+                    ),
+                )
 
         if entity_id == self.global_config.smart_mode_entity:
             await self._async_handle_smart_mode_event(new_state)
@@ -757,7 +772,7 @@ class ControllerRuntime:
         if issue_key in self._unavailable_entities:
             clear_configured_entity_issue(
                 self.hass,
-                controller_id=self.controller.controller_id,
+                entry_id=self.config_entry_id,
                 field_name=field_name,
                 entity_id=entity_id,
             )
@@ -849,7 +864,7 @@ class ControllerRuntime:
         for field_name, entity_id in list(self._unavailable_entities):
             clear_configured_entity_issue(
                 self.hass,
-                controller_id=self.controller.controller_id,
+                entry_id=self.config_entry_id,
                 field_name=field_name,
                 entity_id=entity_id,
             )
@@ -865,7 +880,7 @@ class ControllerRuntime:
         for field_name, entity_id in self._entity_checks():
             clear_configured_entity_issue(
                 self.hass,
-                controller_id=self.controller.controller_id,
+                entry_id=self.config_entry_id,
                 field_name=field_name,
                 entity_id=entity_id,
             )

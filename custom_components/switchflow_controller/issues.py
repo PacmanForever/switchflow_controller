@@ -9,10 +9,10 @@ from homeassistant.util import slugify
 from .const import DOMAIN, ISSUE_ID_PREFIX
 
 
-def _build_issue_id(controller_id: str, field_name: str, entity_id: str) -> str:
-    """Build a stable issue id for one configured entity problem."""
+def _build_issue_id(entry_id: str, field_name: str, entity_id: str) -> str:
+    """Build a stable issue id for one configured entity problem per entry."""
     return (
-        f"{ISSUE_ID_PREFIX}_{slugify(controller_id)}"
+        f"{ISSUE_ID_PREFIX}_{slugify(entry_id)}"
         f"_{slugify(field_name)}_{slugify(entity_id)}"
     )
 
@@ -30,7 +30,7 @@ def report_configured_entity_unavailable(
     ir.async_create_issue(
         hass,
         DOMAIN,
-        _build_issue_id(controller_id, field_name, entity_id),
+        _build_issue_id(entry_id, field_name, entity_id),
         is_fixable=False,
         is_persistent=False,
         severity=ir.IssueSeverity.WARNING,
@@ -52,7 +52,7 @@ def report_configured_entity_unavailable(
 def clear_configured_entity_issue(
     hass: HomeAssistant,
     *,
-    controller_id: str,
+    entry_id: str,
     field_name: str,
     entity_id: str,
 ) -> None:
@@ -60,5 +60,5 @@ def clear_configured_entity_issue(
     ir.async_delete_issue(
         hass,
         DOMAIN,
-        _build_issue_id(controller_id, field_name, entity_id),
+        _build_issue_id(entry_id, field_name, entity_id),
     )

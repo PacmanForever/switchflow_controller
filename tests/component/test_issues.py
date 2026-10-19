@@ -101,8 +101,8 @@ def test_issue_helpers_build_create_and_delete_issue(monkeypatch, hass) -> None:
     monkeypatch.setattr("custom_components.switchflow_controller.issues.ir.async_create_issue", create_issue)
     monkeypatch.setattr("custom_components.switchflow_controller.issues.ir.async_delete_issue", delete_issue)
 
-    issue_id = _build_issue_id("hallway", "night_entity", "light.hallway_night")
-    assert issue_id.startswith("configured_entity_unavailable_hallway")
+    issue_id = _build_issue_id("entry-1", "night_entity", "light.hallway_night")
+    assert issue_id.startswith("configured_entity_unavailable_entry_1")
 
     report_configured_entity_unavailable(
         hass,
@@ -114,10 +114,32 @@ def test_issue_helpers_build_create_and_delete_issue(monkeypatch, hass) -> None:
     )
     clear_configured_entity_issue(
         hass,
-        controller_id="hallway",
+        entry_id="entry-1",
         field_name="night_entity",
         entity_id="light.hallway_night",
     )
 
     create_issue.assert_called_once()
     delete_issue.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_shared_unavailable_entity_creates_one_issue_per_entry(hass) -> None:
+    """Controllers sharing a global entity should share one Repairs issue."""
+    for controller_id in ("hallway", "kitchen", "living_room"):
+        report_configured_entity_unavailable(
+            hass,
+            entry_id="entry-1",
+            controller_id=controller_id,
+            controller_name=controller_id,
+            field_name="alarm_entity",
+            entity_id="alarm_control_panel.house",
+        )
+
+    issue_registry = ir.async_get(hass)
+    matching_issues = [
+        issue
+        for issue in issue_registry.issues.values()
+        if issue.translation_key == "configured_entity_unavailable"
+    ]
+    assert len(matching_issues) == 1
