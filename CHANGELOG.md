@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.14
+
+- Document installation from the HACS default catalog, with custom repository and manual installation alternatives.
+
 ## 0.4.13
 
 - Deduplicate unavailable-entity Repairs issues shared by multiple controllers and clear them automatically when the entity recovers.

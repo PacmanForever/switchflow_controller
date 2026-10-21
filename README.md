@@ -43,37 +43,28 @@ The integration UI is currently available in:
 
 ### Via HACS
 
-Current state: the repository is ready to be installed through HACS as a custom repository.
-
-After it is accepted into the HACS default repository list, the custom-repository step below is no longer needed.
-
 1. Make sure [HACS](https://hacs.xyz/) is installed.
-2. Open HACS.
-3. Go to `Integrations`.
-4. Open the top-right menu and choose `Custom repositories`.
-5. Add `https://github.com/PacmanForever/switchflow_controller` as the custom repository URL.
-6. Select the `Integration` category.
-7. Install `SwitchFlow Controller`.
-8. Restart Home Assistant.
+2. Open HACS and go to `Integrations`.
+3. Search for `SwitchFlow Controller` and open it.
+4. Select `Download` and restart Home Assistant when prompted.
+5. Go to `Settings` > `Devices & services` > `Add integration`, then search for `SwitchFlow Controller` to configure it.
 
-The repository already includes CI validation for unit tests, component tests, HACS validation, and Hassfest validation.
+### If It Is Not Listed In HACS
 
-### HACS Default Repository Submission
+The default HACS catalog may take time to update. You can add the repository directly:
 
-To appear in the default HACS catalog without manually adding this repository, complete these release steps:
-
-1. Publish a GitHub release whose tag matches the manifest version.
-2. Confirm the GitHub repository is public and has a clear description, topics, and release notes.
-3. Ensure the HACS and Hassfest workflows are green on `main`.
-4. Open a pull request against `hacs/default` adding this repository in the `integration` category.
-5. Wait for the HACS maintainers to review and merge that submission.
-
-This repository is structured for step 4 already, but the actual inclusion in the default catalog must be completed from GitHub.
+1. In HACS, open the top-right menu and choose `Custom repositories`.
+2. Enter `https://github.com/PacmanForever/switchflow_controller` and select the `Integration` category.
+3. Add the repository, find `SwitchFlow Controller` in HACS, and select `Download`.
+4. Restart Home Assistant, then add the integration from `Settings` > `Devices & services`.
 
 ### Manual
 
-1. Copy `custom_components/switchflow_controller` into your Home Assistant `custom_components` directory.
+If you do not use HACS, install it as a custom integration:
+
+1. Copy the `custom_components/switchflow_controller` folder from this repository into the `custom_components` directory in your Home Assistant configuration folder. Create `custom_components` if it does not exist.
 2. Restart Home Assistant.
+3. Add `SwitchFlow Controller` from `Settings` > `Devices & services` > `Add integration`.
 
 ## Configuration
 
