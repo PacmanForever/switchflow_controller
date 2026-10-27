@@ -6,6 +6,8 @@
 [![Component Tests](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests_component.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests_component.yml)
 [![Validate HACS](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hacs.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hacs.yml)
 [![Validate Hassfest](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hassfest.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hassfest.yml)
+[![Home Assistant tested](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FPacmanForever%2Fswitchflow_controller%2Fmain%2Fdocs%2Fhome_assistant_compatibility.json&query=%24.tested_version&suffix=%20tested&label=home%20assistant&color=blue)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/daily_compatibility.yml)
+[![Daily HA compatibility](https://github.com/PacmanForever/switchflow_controller/actions/workflows/daily_compatibility.yml/badge.svg?branch=main)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/daily_compatibility.yml)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 ![Coverage](https://img.shields.io/badge/coverage-%E2%89%A595%25-blue)
 
