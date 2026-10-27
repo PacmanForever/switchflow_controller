@@ -195,6 +195,37 @@ async def test_get_state_suppresses_unavailable_warnings_during_startup_grace_pe
 
 
 @pytest.mark.asyncio
+async def test_get_state_suppresses_unavailable_warnings_when_runtime_starts_while_running(
+    hass, monkeypatch
+) -> None:
+    """Runtime startup should apply the grace period even if HA is already running."""
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        _controller(),
+        "entry-1",
+    )
+    report_issue = Mock()
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.report_configured_entity_unavailable",
+        report_issue,
+    )
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.async_track_state_change_event",
+        lambda hass, entity_ids, callback: Mock(),
+    )
+
+    hass.set_state(CoreState.running)
+    await runtime.async_start()
+
+    assert runtime._get_state("binary_sensor.smart", "smart_mode_entity") is None
+    report_issue.assert_not_called()
+
+    await runtime.async_stop()
+
+
+@pytest.mark.asyncio
 async def test_force_operations_delegate_to_helper_paths(hass) -> None:
     """Force helpers should use the underlying controller methods."""
 

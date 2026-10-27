@@ -86,10 +86,9 @@ class ControllerRuntime:
         """Start runtime handling for this controller."""
         LOGGER.debug("Starting controller runtime for %s", self.controller.controller_id)
         self._clear_known_configured_entity_issues()
-        if self.hass.state is not CoreState.running:
-            self._startup_warning_grace_deadline = (
-                time.monotonic() + STARTUP_UNAVAILABLE_WARNING_GRACE_PERIOD
-            )
+        self._startup_warning_grace_deadline = (
+            time.monotonic() + STARTUP_UNAVAILABLE_WARNING_GRACE_PERIOD
+        )
 
         self.add_unsubscriber(
             async_track_state_change_event(

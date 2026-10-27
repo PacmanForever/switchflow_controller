@@ -18,7 +18,7 @@ from custom_components.switchflow_controller.models import ControllerConfig, Glo
 
 
 @pytest.mark.asyncio
-async def test_unavailable_configured_entity_creates_issue(hass) -> None:
+async def test_unavailable_configured_entity_creates_issue(hass, monkeypatch) -> None:
     """Configured-but-unavailable runtime dependencies should create a warning issue when used."""
     controller = ControllerConfig.from_mapping(
         {
@@ -30,9 +30,15 @@ async def test_unavailable_configured_entity_creates_issue(hass) -> None:
         }
     )
     hass.states.async_set("light.hallway", "off")
+    monotonic_value = 100.0
+    monkeypatch.setattr(
+        "custom_components.switchflow_controller.controller.time.monotonic",
+        lambda: monotonic_value,
+    )
 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     await runtime.async_start()
+    monotonic_value += 31.0
     runtime._get_state("binary_sensor.hallway_motion", "detector_sensor_1")
 
     issue_registry = ir.async_get(hass)

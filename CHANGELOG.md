@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.15
+
+- Apply the startup grace period for unavailable configured entities whenever a controller runtime starts, including when Home Assistant is already running.
+
 ## 0.4.14
 
 - Document installation from the HACS default catalog, with custom repository and manual installation alternatives.
