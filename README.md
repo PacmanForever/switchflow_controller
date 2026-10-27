@@ -11,7 +11,6 @@
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 ![Coverage](https://img.shields.io/badge/coverage-%E2%89%A595%25-blue)
 
-![Home Assistant](https://img.shields.io/badge/home%20assistant-2025.3.0%2B-blue)
 
 A community Home Assistant custom integration for managing reusable motion-driven light and switch controllers with shared global configuration and per-controller behavior.
 
